@@ -145,10 +145,10 @@ app.post('/api/create_user_token', function (request, response, next) {
     .then(async function () {
 
       const request = {
-         // Typically this will be a user ID number from your application.
+         // Typically this will be a user ID number from your application. 
         client_user_id: 'user_' + uuidv4()
       }
-
+      
       if (PLAID_PRODUCTS.some(product => product.startsWith("cra_"))) {
         request.consumer_report_user_identity = {
           first_name: 'Harry',
@@ -290,16 +290,11 @@ app.get('/api/transactions', function (request, response, next) {
       // Removed transaction ids
       let removed = [];
       let hasMore = true;
-
-      // Get current date and date from 1 year ago for filtering
-      const endDate = moment();
-      const startDate = moment().subtract(365, 'days');
-
       // Iterate through each page of new transaction updates for item
       while (hasMore) {
         const request = {
           access_token: ACCESS_TOKEN,
-          cursor: cursor
+          cursor: cursor,
         };
         const response = await client.transactionsSync(request)
         const data = response.data;
@@ -324,17 +319,10 @@ app.get('/api/transactions', function (request, response, next) {
         prettyPrintResponse(response);
       }
 
-      // Filter transactions to only include those from the past year
-      const pastYearTransactions = added.filter(transaction => {
-        const transactionDate = moment(transaction.date);
-        return transactionDate.isSameOrAfter(startDate) &&
-               transactionDate.isSameOrBefore(endDate);
-      });
-
       const compareTxnsByDateAscending = (a, b) => (a.date > b.date) - (a.date < b.date);
-      // Return all transactions from the past year, sorted by date
-      const sorted_transactions = [...pastYearTransactions].sort(compareTxnsByDateAscending);
-      response.json({ latest_transactions: sorted_transactions });
+      // Return the 8 most recent transactions
+      const recently_added = [...added].sort(compareTxnsByDateAscending).slice(-8);
+      response.json({ latest_transactions: recently_added });
     })
     .catch(next);
 });
