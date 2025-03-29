@@ -8,7 +8,7 @@ import Dashboard from './components/Dashboard';
 import Shop from './components/Shop';
 import CompleteProfile from './components/CompleteProfile';
 import FinancialInfo from './components/FinancialInfo';
-import Transactions from './components/Transactions';
+import TransactionsPage from './Pages/Transactions';
 import './App.css';
 
 // Replace with your actual Google Client ID
@@ -27,7 +27,7 @@ const App = () => {
             <Route path="/shop" element={<Shop />} />
             <Route path="/complete-profile" element={<CompleteProfile />} />
             <Route path="/financial-info" element={<FinancialInfo />} />
-            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/transactions" element={<TransactionsPage />} />
             <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>
         </div>
@@ -37,5 +37,3 @@ const App = () => {
 };
 
 export default App;
-
-

@@ -160,7 +160,7 @@ export const switchPaymentMethod = async (userId, transactionId, newCardId) => {
 export const linkCard = async (userId, cardData) => {
   // Generate a unique ID for the new card
   const newCardId = `card_${Date.now()}`;
-  
+
   // Create new card object
   const newCard = {
     id: newCardId,
@@ -199,6 +199,36 @@ export const linkCard = async (userId, cardData) => {
   return newCard;
 };
 
+// Function to fetch transactions from Plaid API
+export const getPlaidTransactions = async () => {
+  try {
+    const response = await axios.get('/api/transactions');
+
+    // Check if transactions exist in the response
+    if (!response.data || !response.data.transactions || !Array.isArray(response.data.transactions)) {
+      console.warn('No transactions data found in the response');
+      return [];
+    }
+
+    return response.data.transactions.map(transaction => ({
+      id: transaction.transaction_id || transaction.id || `txn_${Math.random().toString(36).substr(2, 9)}`,
+      date: transaction.date,
+      amount: transaction.amount,
+      name: transaction.name || 'Unknown Transaction',
+      merchant: transaction.merchant_name || 'Unknown',
+      category: transaction.category && transaction.category.length > 0 ? transaction.category[0] : 'Uncategorized',
+      account_id: transaction.account_id,
+      payment_channel: transaction.payment_channel || 'other',
+      pending: transaction.pending || false,
+      raw: transaction // Keep the raw transaction data for reference
+    }));
+  } catch (error) {
+    console.error('Error fetching Plaid transactions:', error);
+    // Return empty array instead of throwing to prevent page from breaking
+    return [];
+  }
+};
+
 // Add response interceptor for better error handling
 knotClient.interceptors.response.use(
   response => response,
@@ -218,4 +248,4 @@ knotClient.interceptors.response.use(
       throw new Error('Failed to set up request');
     }
   }
-); 
+);

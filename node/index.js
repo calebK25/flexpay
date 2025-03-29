@@ -145,10 +145,10 @@ app.post('/api/create_user_token', function (request, response, next) {
     .then(async function () {
 
       const request = {
-         // Typically this will be a user ID number from your application. 
+         // Typically this will be a user ID number from your application.
         client_user_id: 'user_' + uuidv4()
       }
-      
+
       if (PLAID_PRODUCTS.some(product => product.startsWith("cra_"))) {
         request.consumer_report_user_identity = {
           first_name: 'Harry',
@@ -281,48 +281,63 @@ app.get('/api/auth', function (request, response, next) {
 app.get('/api/transactions', function (request, response, next) {
   Promise.resolve()
     .then(async function () {
-      // Set cursor to empty to receive all historical updates
-      let cursor = null;
+      // If no access token is available, return sample data
+      if (!ACCESS_TOKEN) {
+        console.log('No access token available, returning sample transaction data');
 
-      // New transaction updates since "cursor"
-      let added = [];
-      let modified = [];
-      // Removed transaction ids
-      let removed = [];
-      let hasMore = true;
-      // Iterate through each page of new transaction updates for item
-      while (hasMore) {
-        const request = {
-          access_token: ACCESS_TOKEN,
-          cursor: cursor,
-        };
-        const response = await client.transactionsSync(request)
-        const data = response.data;
+        // Generate sample transaction data
+        const sampleTransactions = [];
+        const today = moment();
 
-        // If no transactions are available yet, wait and poll the endpoint.
-        // Normally, we would listen for a webhook, but the Quickstart doesn't
-        // support webhooks. For a webhook example, see
-        // https://github.com/plaid/tutorial-resources or
-        // https://github.com/plaid/pattern
-        cursor = data.next_cursor;
-        if (cursor === "") {
-          await sleep(2000);
-          continue;
+        for (let i = 0; i < 20; i++) {
+          const date = moment(today).subtract(Math.floor(Math.random() * 365), 'days');
+
+          sampleTransactions.push({
+            transaction_id: `sample-txn-${i}`,
+            date: date.format('YYYY-MM-DD'),
+            amount: (Math.random() * 1000 - 500).toFixed(2) * 1,  // Random amount between -500 and 500
+            name: `Sample Transaction ${i + 1}`,
+            merchant_name: ['Walmart', 'Amazon', 'Target', 'Starbucks', 'Netflix'][Math.floor(Math.random() * 5)],
+            category: ['Food and Drink', 'Shopping', 'Travel', 'Entertainment', 'Bills and Utilities'][Math.floor(Math.random() * 5)],
+            payment_channel: ['online', 'in store', 'other'][Math.floor(Math.random() * 3)],
+            pending: Math.random() > 0.9, // 10% chance of being pending
+          });
         }
 
-        // Add this page of results
-        added = added.concat(data.added);
-        modified = modified.concat(data.modified);
-        removed = removed.concat(data.removed);
-        hasMore = data.has_more;
-
-        prettyPrintResponse(response);
+        return response.json({
+          transactions: sampleTransactions,
+          accounts: [{
+            account_id: 'sample-account',
+            name: 'Sample Checking Account',
+            type: 'depository',
+            subtype: 'checking',
+            mask: '1234'
+          }]
+        });
       }
 
+      // Get transactions from the last 365 days
+      const startDate = moment().subtract(365, 'days').format('YYYY-MM-DD');
+      const endDate = moment().format('YYYY-MM-DD');
+
+      const request = {
+        access_token: ACCESS_TOKEN,
+        start_date: startDate,
+        end_date: endDate,
+      };
+
+      const transactionsResponse = await client.transactionsGet(request);
+      prettyPrintResponse(transactionsResponse);
+
+      // Sort transactions by date in ascending order
+      const transactions = transactionsResponse.data.transactions;
       const compareTxnsByDateAscending = (a, b) => (a.date > b.date) - (a.date < b.date);
-      // Return the 8 most recent transactions
-      const recently_added = [...added].sort(compareTxnsByDateAscending).slice(-8);
-      response.json({ latest_transactions: recently_added });
+      const sortedTransactions = [...transactions].sort(compareTxnsByDateAscending);
+
+      response.json({
+        transactions: sortedTransactions,
+        accounts: transactionsResponse.data.accounts
+      });
     })
     .catch(next);
 });
