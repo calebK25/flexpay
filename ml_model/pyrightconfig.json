@@ -1,0 +1,9 @@
+{
+    "venvPath": ".",
+    "venv": ".",
+    "extraPaths": [
+        "/Users/caleb/Library/Python/3.9/lib/python/site-packages"
+    ],
+    "reportMissingImports": false,
+    "reportMissingModuleSource": false
+} 

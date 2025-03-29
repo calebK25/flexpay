@@ -1,0 +1,19 @@
+{
+    "age": 0.006471254912426154,
+    "annual_income": 0.04155864311715548,
+    "credit_score": 0.05423502018423353,
+    "employment_length_years": 0.0061698872824639,
+    "debt_to_income_ratio": 0.04879378793379432,
+    "number_of_credit_cards": 0.00267006412056407,
+    "past_defaults": 0.44978635641644577,
+    "monthly_rent": 0.0062771788732443505,
+    "savings_balance": 0.006380161800258809,
+    "monthly_income": 0.04542940379741164,
+    "monthly_expenses": 0.019532921606200588,
+    "credit_utilization": 0.005391662194390027,
+    "number_of_loans": 0.002136211969205901,
+    "loan_payment_history": 0.16668073415590662,
+    "bankruptcy_history": 0.12951452646796074,
+    "recent_credit_inquiries": 0.0024446500500298965,
+    "length_of_credit_history": 0.006527535118308183
+}

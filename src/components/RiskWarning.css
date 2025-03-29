@@ -1,0 +1,163 @@
+.risk-warning-container {
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.warning-box {
+  padding: 1rem;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #f59e0b;
+  animation: slideIn 0.3s ease-out;
+}
+
+.warning-box.high {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.warning-box.medium {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.warning-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.warning-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.warning-box.high .warning-icon {
+  color: #ef4444;
+}
+
+.warning-box.medium .warning-icon {
+  color: #f59e0b;
+}
+
+.warning-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.warning-box.high .warning-title {
+  color: #991b1b;
+}
+
+.warning-box.medium .warning-title {
+  color: #92400e;
+}
+
+.warning-message {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.risk-assessment {
+  padding: 1.5rem;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.risk-assessment-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.risk-level-indicator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.risk-level {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+}
+
+.risk-level.high {
+  background: #ef4444;
+}
+
+.risk-level.medium {
+  background: #f59e0b;
+}
+
+.risk-level.low {
+  background: #22c55e;
+}
+
+.risk-score {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.risk-factors, .recommendations {
+  margin-top: 1rem;
+}
+
+.risk-factors h4, .recommendations h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.risk-factors ul, .recommendations ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.risk-factors li, .recommendations li {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .risk-warning-container {
+    margin: 0.5rem 0;
+  }
+
+  .warning-box, .risk-assessment {
+    padding: 1rem;
+  }
+
+  .risk-level-indicator {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+} 

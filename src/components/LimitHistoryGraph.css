@@ -1,0 +1,23 @@
+.limit-history-tracker {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .limit-history-tracker {
+    padding: 1rem;
+  }
+  
+  .chart-container {
+    height: 250px;
+  }
+} 
