@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "FlexPay",
+  "name": "FlexPay - Modern payment infrastructure",
   "icons": [
     {
       "src": "favicon.ico",
