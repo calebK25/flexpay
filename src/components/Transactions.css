@@ -11,9 +11,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
 }
 
 .transactions-header h2 {
@@ -24,22 +27,18 @@
 }
 
 .add-card-btn {
-  padding: 0.75rem 1.5rem;
-  background: #3b82f6;
+  background: #28a745;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 4px;
   cursor: pointer;
+  font-weight: 500;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 }
 
 .add-card-btn:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
+  background: #218838;
 }
 
 .add-card-btn::before {
@@ -245,19 +244,25 @@
 }
 
 .card-option {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #ddd;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  gap: 8px;
 }
 
 .card-option:hover {
+  background: #e9ecef;
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.card-option.selected {
+  background: #e3f2fd;
+  border-color: #007bff;
 }
 
 .card-icon {
@@ -283,13 +288,18 @@
 }
 
 .card-number {
-  font-weight: 600;
-  color: #111827;
+  color: #333;
+  font-size: 1.1em;
+  font-weight: 500;
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
 }
 
 .card-expiry {
-  font-size: 0.875rem;
-  color: #6b7280;
+  color: #666;
+  font-size: 0.9em;
 }
 
 .create-plan-btn {
@@ -426,6 +436,411 @@
   padding: 0.5rem;
 }
 
+.transaction-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.transaction-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.transaction-card.selected {
+  border: 2px solid #007bff;
+  background-color: #f8f9fa;
+}
+
+.transaction-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.transaction-info h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.transaction-info p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.transaction-amount {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.transaction-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.card-switch-btn,
+.transaction-link-btn {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-size: 0.9rem;
+}
+
+.card-switch-btn {
+  background: #10b981;
+  color: white;
+}
+
+.card-switch-btn:hover {
+  background: #059669;
+}
+
+.transaction-link-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.transaction-link-btn:hover {
+  background: #2563eb;
+}
+
+.card-switch-btn:disabled,
+.transaction-link-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.payment-methods {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.payment-method {
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-brand {
+  font-weight: 500;
+  color: #333;
+}
+
+.card-last4 {
+  color: #fff;
+  background: #333;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.payment-plan-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.payment-plan-section h3 {
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.payment-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.payment-plan-option {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.payment-plan-option:hover {
+  background: #f9fafb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.payment-plan-option.selected {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.plan-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.plan-payments {
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.plan-apr {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f3f4f6;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.apr-label {
+  color: #6b7280;
+}
+
+.apr-value {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.plan-description {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h2 {
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.card-option {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-option:hover {
+  background: #f9fafb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.card-option.selected {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.card-brand {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.card-number {
+  color: #1f2937;
+  font-size: 1.1rem;
+  font-weight: 500;
+  background: #f3f4f6;
+  padding: 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.card-expiry {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.switch-card-btn,
+.cancel-btn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.switch-card-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.switch-card-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.switch-card-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.transaction-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.card-switch-btn,
+.transaction-link-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.card-switch-btn {
+  background: #10b981;
+  color: white;
+}
+
+.card-switch-btn:hover {
+  background: #059669;
+}
+
+.transaction-link-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.transaction-link-btn:hover {
+  background: #2563eb;
+}
+
+.card-switch-btn:disabled,
+.transaction-link-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 1100;
+  animation: slideIn 0.3s ease;
+}
+
+.notification.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.notification.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.notification button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+}
+
+.notification button:hover {
+  opacity: 1;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 @media (max-width: 768px) {
   .transactions-container {
     padding: 1rem;
@@ -453,4 +868,337 @@
   .plan-details {
     grid-template-columns: 1fr;
   }
+
+  .card-selection-modal {
+    width: 95%;
+    padding: 1rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+}
+
+.transaction-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.transaction-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.transaction-card.selected {
+  border: 2px solid #007bff;
+  background-color: #f8f9fa;
+}
+
+.transaction-info {
+  margin-bottom: 15px;
+}
+
+.transaction-info h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.transaction-info p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.payment-methods {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.payment-method {
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-brand {
+  font-weight: 500;
+  color: #333;
+}
+
+.card-last4 {
+  color: #fff;
+  background: #333;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.connect-bank-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.connect-bank-btn:hover {
+  background: #218838;
+}
+
+.connect-bank-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.payment-plan-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.payment-plan-section h3 {
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.payment-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.payment-plan-option {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.payment-plan-option:hover {
+  background: #f9fafb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.payment-plan-option.selected {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.plan-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.plan-payments {
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.plan-apr {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f3f4f6;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.apr-label {
+  color: #6b7280;
+}
+
+.apr-value {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.plan-description {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h2 {
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.card-option {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-option:hover {
+  background: #f9fafb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.card-option.selected {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.card-brand {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.card-number {
+  color: #1f2937;
+  font-size: 1.1rem;
+  font-weight: 500;
+  background: #f3f4f6;
+  padding: 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.card-expiry {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.switch-card-btn,
+.cancel-btn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.switch-card-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.switch-card-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.switch-card-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.transaction-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.card-switch-btn,
+.transaction-link-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.card-switch-btn {
+  background: #10b981;
+  color: white;
+}
+
+.card-switch-btn:hover {
+  background: #059669;
+}
+
+.transaction-link-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.transaction-link-btn:hover {
+  background: #2563eb;
+}
+
+.card-switch-btn:disabled,
+.transaction-link-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 } 

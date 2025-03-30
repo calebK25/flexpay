@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getTransactions, getLinkedCards, linkCard } from '../utils/knotUtils';
+import { getTransactions, getLinkedCards, linkCard, getAvailableCards, switchCard } from '../utils/knotUtils';
 import Notification from './Notification';
 import './Transactions.css';
 
@@ -24,6 +24,8 @@ const Transactions = ({ userId }) => {
     brand: ''
   });
   const [notification, setNotification] = useState(null);
+  const [availableCards, setAvailableCards] = useState([]);
+  const [selectedCard, setSelectedCard] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -148,6 +150,43 @@ const Transactions = ({ userId }) => {
 
   const handleCloseNotification = () => {
     setNotification(null);
+  };
+
+  const handleTransactionSelect = async (transaction) => {
+    setSelectedTransaction(transaction);
+    setSelectedCard(null);
+    try {
+      const cards = await getAvailableCards(transaction.id);
+      setAvailableCards(cards);
+    } catch (err) {
+      setError('Failed to load available cards');
+      console.error(err);
+    }
+  };
+
+  const handleCardSelect = (card) => {
+    setSelectedCard(card);
+  };
+
+  const handleSwitchCard = async () => {
+    if (!selectedTransaction || !selectedCard) return;
+
+    try {
+      await switchCard(selectedTransaction.id, selectedCard.id);
+      setNotification({
+        type: 'success',
+        message: 'Card successfully switched for this transaction'
+      });
+      loadData(); // Reload transactions to show updated card
+      setSelectedTransaction(null);
+      setSelectedCard(null);
+    } catch (err) {
+      setNotification({
+        type: 'error',
+        message: 'Failed to switch card'
+      });
+      console.error(err);
+    }
   };
 
   if (loading) {
@@ -301,7 +340,11 @@ const Transactions = ({ userId }) => {
 
       <div className="transactions-list">
         {transactions.map(transaction => (
-          <div key={transaction.id} className="transaction-item">
+          <div 
+            key={transaction.id} 
+            className={`transaction-item ${selectedTransaction?.id === transaction.id ? 'selected' : ''}`}
+            onClick={() => handleTransactionSelect(transaction)}
+          >
             <div className="transaction-header">
               <div className="transaction-info">
                 <h3>{transaction.merchant}</h3>
@@ -338,7 +381,11 @@ const Transactions = ({ userId }) => {
                   <h4>Payment Options</h4>
                   <div className="cards-grid">
                     {cards.map(card => (
-                      <div key={card.id} className="card-option">
+                      <div 
+                        key={card.id}
+                        className={`card-option ${selectedCard?.id === card.id ? 'selected' : ''}`}
+                        onClick={() => handleCardSelect(card)}
+                      >
                         <div className="card-icon">
                           {card.brand === 'visa' ? (
                             <svg viewBox="0 0 24 24" fill="#1A1F71">
@@ -360,7 +407,10 @@ const Transactions = ({ userId }) => {
                         </div>
                         <button 
                           className="create-plan-btn"
-                          onClick={() => handleCreatePaymentPlan(transaction, card.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCreatePaymentPlan(transaction, card.id);
+                          }}
                         >
                           Create Payment Plan
                         </button>
@@ -373,6 +423,47 @@ const Transactions = ({ userId }) => {
           </div>
         ))}
       </div>
+
+      {selectedTransaction && (
+        <div className="card-selection-modal">
+          <h3>Select a New Card</h3>
+          <div className="cards-grid">
+            {availableCards.map(card => (
+              <div 
+                key={card.id}
+                className={`card-option ${selectedCard?.id === card.id ? 'selected' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCardSelect(card);
+                }}
+              >
+                <div className="card-brand">{card.brand}</div>
+                <div className="card-last4">•••• {card.last4}</div>
+                <div className="card-expiry">Expires {card.exp_month}/{card.exp_year}</div>
+              </div>
+            ))}
+          </div>
+          <div className="modal-actions">
+            <button 
+              className="cancel-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedTransaction(null);
+                setSelectedCard(null);
+              }}
+            >
+              Cancel
+            </button>
+            <button 
+              className="switch-btn"
+              disabled={!selectedCard}
+              onClick={handleSwitchCard}
+            >
+              Switch Card
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

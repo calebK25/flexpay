@@ -1,0 +1,8 @@
+authtoken: 2v0TYc6meCPEDRhDhUdr6CtiuiB_5xmrNCDyoCUJSP4p8rhLb
+version: "2"
+tunnels:
+  webhook:
+    addr: 3000
+    proto: http
+    host_header: "localhost:3000"
+    inspect: true

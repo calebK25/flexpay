@@ -101,7 +101,7 @@ app.post('/api/create_link_token', function (request, response, next) {
       const configs = {
         user: {
           // This should correspond to a unique id for the current user.
-          client_user_id: 'user-id',
+          client_user_id: uuidv4(),
         },
         client_name: 'Plaid Quickstart',
         products: PLAID_PRODUCTS,

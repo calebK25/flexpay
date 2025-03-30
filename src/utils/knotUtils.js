@@ -1,236 +1,307 @@
 import axios from 'axios';
 
-const KNOT_API_KEY = process.env.REACT_APP_KNOT_API_KEY;
-const KNOT_API_URL = 'https://api.knotapi.com/v1';
+const KNOT_API_URL = 'https://api.knotapi.com/v2';
+const KNOT_CLIENT_ID = process.env.REACT_APP_KNOT_CLIENT_ID;
+const KNOT_SECRET = process.env.REACT_APP_KNOT_SECRET;
 
-// Mock data for development
-const mockData = {
-  merchant: {
-    id: 45,
-    name: "Walmart"
-  },
-  transactions: [
-    {
-      id: "66e35383-990c-4934-a766-c600ee632d27",
-      external_id: "2ca2fdd5-ec2c-47ef-813d-463ef3951b5f",
-      datetime: "2024-11-10T00:00:00+00:00",
-      url: "https://www.walmart.com/orders/123123123rand",
-      order_status: "ORDERED",
-      payment_methods: [
-        {
-          external_id: "323245",
-          type: "CARD",
-          brand: "EBT",
-          last_four: "1111",
-          name: null,
-          transaction_amount: 32.23
-        },
-        {
-          external_id: "592134",
-          type: "CARD",
-          brand: "AMEX",
-          last_four: "1111",
-          name: null,
-          transaction_amount: 27.77
-        }
-      ],
-      price: {
-        sub_total: 60,
-        adjustments: [],
-        total: 60,
-        currency: "USD"
-      },
-      products: [
-        {
-          external_id: "10315643",
-          name: "Aleve Tablets with Easy Open Arthritis Cap, Naproxen Sodium, for Pain Relief, 200 Count",
-          url: "https://www.walmart.com/ip/576115402",
-          quantity: 1,
-          eligibility: [],
-          price: {
-            sub_total: 30,
-            total: 30,
-            unit_price: 30
-          }
-        },
-        {
-          external_id: "880919144",
-          name: "Freshness Guaranteed Hawaiian Dinner Rolls, 16 oz, 12 Count (Regular)",
-          url: "https://www.walmart.com/ip/880919144",
-          quantity: 1,
-          eligibility: [],
-          price: {
-            sub_total: 30,
-            total: 30,
-            unit_price: 30
-          }
-        }
-      ]
-    },
-    // ... other transactions from mock data
-  ],
-  next_cursor: "eyJpZCI6MTI3NjEsIl9wb2ludHNUb05leHRJdGVtcyI6dHJ1ZX0",
-  limit: 5
-};
+const getKnotClient = () => {
+  const auth = 'Basic ' + btoa(`${KNOT_CLIENT_ID}:${KNOT_SECRET}`);
 
-// Initialize KnotAPI client
-const knotClient = axios.create({
-  baseURL: KNOT_API_URL,
-  headers: {
-    'Authorization': `Bearer ${KNOT_API_KEY}`,
-    'Content-Type': 'application/json'
-  }
-});
-
-// Mock API functions for development
-export const getLinkedCards = async (userId) => {
-  // Extract unique payment methods from transactions
-  const uniqueCards = new Map();
-  mockData.transactions.forEach(transaction => {
-    transaction.payment_methods.forEach(method => {
-      if (!uniqueCards.has(method.external_id)) {
-        uniqueCards.set(method.external_id, {
-          id: method.external_id,
-          brand: method.brand,
-          last4: method.last_four,
-          type: method.type,
-          name: method.name || `${method.brand} Card`
-        });
-      }
-    });
-  });
-  return Array.from(uniqueCards.values());
-};
-
-export const getTransactions = async (userId) => {
-  return mockData.transactions.map(transaction => ({
-    id: transaction.id,
-    date: transaction.datetime,
-    amount: transaction.price.total,
-    status: transaction.order_status,
-    merchant: mockData.merchant.name,
-    payment_methods: transaction.payment_methods,
-    products: transaction.products
-  }));
-};
-
-export const getMerchantDetails = async (merchantId) => {
+  
   return {
-    id: mockData.merchant.id,
-    name: mockData.merchant.name,
-    transaction_count: mockData.transactions.length,
-    total_spent: mockData.transactions.reduce((sum, t) => sum + t.price.total, 0),
-    last_transaction: new Date(Math.max(...mockData.transactions.map(t => new Date(t.datetime)))),
-    average_transaction: mockData.transactions.reduce((sum, t) => sum + t.price.total, 0) / mockData.transactions.length
+    headers: {
+      'Authorization': `Basic ${auth}`,
+      'Content-Type': 'application/json',
+      'Knot-Version': '2.0'
+    }
   };
 };
 
-export const getUserMerchants = async (userId) => {
-  const merchantDetails = await getMerchantDetails(mockData.merchant.id);
-  return [merchantDetails];
-};
-
-export const switchPaymentMethod = async (userId, transactionId, newCardId) => {
-  // Find the transaction and update its payment method
-  const transaction = mockData.transactions.find(t => t.id === transactionId);
-  if (!transaction) {
-    throw new Error('Transaction not found');
-  }
-
-  // Find the new card details
-  const newCard = (await getLinkedCards(userId)).find(card => card.id === newCardId);
-  if (!newCard) {
-    throw new Error('Card not found');
-  }
-
-  // Update the payment method
-  transaction.payment_methods = [{
-    external_id: newCard.id,
-    type: newCard.type,
-    brand: newCard.brand,
-    last_four: newCard.last4,
-    name: newCard.name,
-    transaction_amount: transaction.price.total
-  }];
-
-  return transaction;
-};
-
-// Add new card function
-export const linkCard = async (userId, cardData) => {
-  // Generate a unique ID for the new card
-  const newCardId = `card_${Date.now()}`;
-
-  // Create new card object
-  const newCard = {
-    id: newCardId,
-    brand: cardData.brand || 'UNKNOWN',
-    last4: cardData.last4 || '****',
-    type: cardData.type || 'CARD',
-    name: cardData.name || `${cardData.brand || 'Card'} Card`,
-    exp_month: cardData.exp_month,
-    exp_year: cardData.exp_year
-  };
-
-  // Add the card to a mock transaction to simulate it being linked
-  mockData.transactions.push({
-    id: `txn_${Date.now()}`,
-    external_id: `ext_${Date.now()}`,
-    datetime: new Date().toISOString(),
-    url: "https://www.walmart.com/orders/mock",
-    order_status: "COMPLETED",
-    payment_methods: [{
-      external_id: newCardId,
-      type: newCard.type,
-      brand: newCard.brand,
-      last_four: newCard.last4,
-      name: newCard.name,
-      transaction_amount: 0
-    }],
-    price: {
-      sub_total: 0,
-      adjustments: [],
-      total: 0,
-      currency: "USD"
-    },
-    products: []
-  });
-
-  return newCard;
-};
-
-// Function to fetch transactions from Plaid API
-export const getPlaidTransactions = async () => {
+// Get linked cards
+export const getLinkedCards = async () => {
   try {
-    const response = await axios.get('/api/transactions');
+    const response = await axios.get(`${KNOT_API_URL}/cards`, getKnotClient());
+    return response.data;
+  } catch (error) {
+    console.error('Error getting linked cards:', error);
+    throw error;
+  }
+};
 
-    // Check if transactions exist in the response
-    if (!response.data || !response.data.transactions || !Array.isArray(response.data.transactions)) {
-      console.warn('No transactions data found in the response');
-      return [];
+// Get transactions with pagination, filtering, and sorting
+export const getTransactions = async (options = {}) => {
+  const {
+    cursor = null,
+    count = 100,
+    filters = {},
+    sort = { field: 'date', direction: 'desc' },
+    includeOptions = {
+      include_pending: true,
+      include_failed: true,
+      include_refunds: true,
+      include_disputes: true,
+      include_subscriptions: true
+    }
+  } = options;
+
+  try {
+    const response = await axios.post(
+      `${KNOT_API_URL}/transactions/sync`,
+      {
+        cursor,
+        count,
+        options: includeOptions,
+        filters: {
+          date_range: filters.dateRange,
+          amount_range: filters.amountRange,
+          status: filters.status,
+          merchant: filters.merchant,
+          card_id: filters.cardId,
+          subscription_id: filters.subscriptionId,
+          dispute_status: filters.disputeStatus
+        },
+        sort: {
+          field: sort.field,
+          direction: sort.direction
+        }
+      },
+      getKnotClient()
+    );
+
+    console.log('Transactions sync response:', response.data);
+
+    if (!response.data.transactions) {
+      console.error('No transactions in response:', response.data);
+      return {
+        transactions: [],
+        hasMore: false,
+        nextCursor: null,
+        syncId: null
+      };
     }
 
-    return response.data.transactions.map(transaction => ({
-      id: transaction.transaction_id || transaction.id || `txn_${Math.random().toString(36).substr(2, 9)}`,
-      date: transaction.date,
-      amount: transaction.amount,
-      name: transaction.name || 'Unknown Transaction',
-      merchant: transaction.merchant_name || 'Unknown',
-      category: transaction.category && transaction.category.length > 0 ? transaction.category[0] : 'Uncategorized',
-      account_id: transaction.account_id,
-      payment_channel: transaction.payment_channel || 'other',
-      pending: transaction.pending || false,
-      raw: transaction // Keep the raw transaction data for reference
-    }));
+    return {
+      transactions: response.data.transactions.map(transaction => ({
+        id: transaction.id,
+        date: transaction.datetime,
+        amount: transaction.price.total,
+        status: transaction.order_status,
+        merchant: transaction.merchant?.name || 'Unknown Merchant',
+        payment_methods: transaction.payment_methods,
+        products: transaction.products,
+        card_id: transaction.card_id,
+        card_last_four: transaction.card_last_four,
+        card_brand: transaction.card_brand,
+        sync_id: response.data.sync_id,
+        // Additional transaction details
+        currency: transaction.price.currency,
+        subtotal: transaction.price.subtotal,
+        tax: transaction.price.tax,
+        shipping: transaction.price.shipping,
+        discount: transaction.price.discount,
+        refunded_amount: transaction.refunded_amount,
+        dispute_status: transaction.dispute_status,
+        subscription_id: transaction.subscription_id,
+        subscription_status: transaction.subscription_status,
+        subscription_interval: transaction.subscription_interval,
+        subscription_next_billing_date: transaction.subscription_next_billing_date,
+        customer_email: transaction.customer_email,
+        customer_name: transaction.customer_name,
+        billing_address: transaction.billing_address,
+        shipping_address: transaction.shipping_address,
+        metadata: transaction.metadata,
+        created_at: transaction.created_at,
+        updated_at: transaction.updated_at
+      })),
+      hasMore: response.data.has_more,
+      nextCursor: response.data.next_cursor,
+      syncId: response.data.sync_id
+    };
   } catch (error) {
-    console.error('Error fetching Plaid transactions:', error);
-    // Return empty array instead of throwing to prevent page from breaking
-    return [];
+    console.error('Error syncing transactions:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Get all transactions with filtering and sorting
+export const getAllTransactions = async (options = {}) => {
+  const {
+    maxTransactions = 1000,
+    filters = {},
+    sort = { field: 'date', direction: 'desc' }
+  } = options;
+
+  let allTransactions = [];
+  let hasMore = true;
+  let cursor = null;
+  let totalFetched = 0;
+  let lastSyncId = null;
+
+  try {
+    while (hasMore && totalFetched < maxTransactions) {
+      const response = await getTransactions({
+        cursor,
+        filters,
+        sort
+      });
+      
+      allTransactions = [...allTransactions, ...response.transactions];
+      hasMore = response.hasMore;
+      cursor = response.nextCursor;
+      lastSyncId = response.syncId;
+      totalFetched += response.transactions.length;
+
+      console.log(`Fetched ${totalFetched} transactions so far...`);
+    }
+
+    return {
+      transactions: allTransactions,
+      total: totalFetched,
+      syncId: lastSyncId
+    };
+  } catch (error) {
+    console.error('Error fetching all transactions:', error);
+    throw error;
+  }
+};
+
+// Perform incremental sync with filtering and sorting
+export const syncNewTransactions = async (syncId, options = {}) => {
+  const {
+    filters = {},
+    sort = { field: 'date', direction: 'desc' }
+  } = options;
+
+  try {
+    const response = await axios.post(
+      `${KNOT_API_URL}/transactions/sync`,
+      {
+        sync_id: syncId,
+        count: 100,
+        options: {
+          include_pending: true,
+          include_failed: true,
+          include_refunds: true,
+          include_disputes: true,
+          include_subscriptions: true
+        },
+        filters: {
+          date_range: filters.dateRange,
+          amount_range: filters.amountRange,
+          status: filters.status,
+          merchant: filters.merchant,
+          card_id: filters.cardId,
+          subscription_id: filters.subscriptionId,
+          dispute_status: filters.disputeStatus
+        },
+        sort: {
+          field: sort.field,
+          direction: sort.direction
+        }
+      },
+      getKnotClient()
+    );
+
+    if (!response.data.transactions) {
+      return {
+        transactions: [],
+        hasMore: false,
+        nextCursor: null,
+        syncId: response.data.sync_id
+      };
+    }
+
+    return {
+      transactions: response.data.transactions.map(transaction => ({
+        id: transaction.id,
+        date: transaction.datetime,
+        amount: transaction.price.total,
+        status: transaction.order_status,
+        merchant: transaction.merchant?.name || 'Unknown Merchant',
+        payment_methods: transaction.payment_methods,
+        products: transaction.products,
+        card_id: transaction.card_id,
+        card_last_four: transaction.card_last_four,
+        card_brand: transaction.card_brand,
+        sync_id: response.data.sync_id,
+        // Additional transaction details
+        currency: transaction.price.currency,
+        subtotal: transaction.price.subtotal,
+        tax: transaction.price.tax,
+        shipping: transaction.price.shipping,
+        discount: transaction.price.discount,
+        refunded_amount: transaction.refunded_amount,
+        dispute_status: transaction.dispute_status,
+        subscription_id: transaction.subscription_id,
+        subscription_status: transaction.subscription_status,
+        subscription_interval: transaction.subscription_interval,
+        subscription_next_billing_date: transaction.subscription_next_billing_date,
+        customer_email: transaction.customer_email,
+        customer_name: transaction.customer_name,
+        billing_address: transaction.billing_address,
+        shipping_address: transaction.shipping_address,
+        metadata: transaction.metadata,
+        created_at: transaction.created_at,
+        updated_at: transaction.updated_at
+      })),
+      hasMore: response.data.has_more,
+      nextCursor: response.data.next_cursor,
+      syncId: response.data.sync_id
+    };
+  } catch (error) {
+    console.error('Error performing incremental sync:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Switch payment method for a transaction
+export const switchCard = async (transactionId, newCardId) => {
+  try {
+    const response = await axios.post(
+      `${KNOT_API_URL}/transactions/${transactionId}/switch`,
+      { card_id: newCardId },
+      getKnotClient()
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error switching card:', error);
+    throw error;
+  }
+};
+
+// Get available cards for a transaction
+export const getAvailableCards = async (transactionId) => {
+  try {
+    console.log('Fetching available cards for transaction:', transactionId);
+    const response = await axios.get(
+      `${KNOT_API_URL}/transactions/${transactionId}/available-cards`,
+      getKnotClient()
+    );
+    console.log('Available cards response:', response.data);
+    return response.data.cards;
+  } catch (error) {
+    console.error('Error fetching available cards:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Link a new card
+export const linkCard = async (cardDetails) => {
+  try {
+    const response = await axios.post(
+      `${KNOT_API_URL}/cards`,
+      cardDetails,
+      getKnotClient()
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error linking card:', error);
+    throw error;
   }
 };
 
 // Add response interceptor for better error handling
-knotClient.interceptors.response.use(
+axios.interceptors.response.use(
   response => response,
   error => {
     if (error.response) {

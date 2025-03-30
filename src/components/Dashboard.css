@@ -1562,4 +1562,124 @@
     margin-top: 1rem;
     max-width: 100%;
   }
+}
+
+.active-payment-plans {
+  margin-top: 2rem;
+}
+
+.active-payment-plans h2 {
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.plan-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.plan-card.missed-payment {
+  border-left: 4px solid #ef4444;
+  background-color: #fef2f2;
+}
+
+.plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.plan-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.plan-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.plan-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.plan-status.paid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.plan-status.missed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.plan-details {
+  margin-bottom: 1.5rem;
+}
+
+.plan-details p {
+  margin: 0.5rem 0;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.plan-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.pay-now-btn,
+.missed-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.pay-now-btn {
+  background: #10b981;
+  color: white;
+}
+
+.pay-now-btn:hover {
+  background: #059669;
+}
+
+.missed-btn {
+  background: #f3f4f6;
+  color: #ef4444;
+}
+
+.missed-btn:hover {
+  background: #fee2e2;
+}
+
+.no-plans {
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px dashed #e5e7eb;
 } 

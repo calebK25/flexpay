@@ -4,9 +4,10 @@ import { useGoogleLogin } from '@react-oauth/google';
 import CreditCardAnimation from './CreditCardAnimation';
 import './Login.css';
 
-const Login = () => {
+const Login = ({ onLogin }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: ''
   });
@@ -18,12 +19,12 @@ const Login = () => {
     // Start shifting cards after initial reveal
     const timer = setTimeout(() => {
       setShiftCards(true);
-    }, 3000); // Increased delay to ensure cards are fully revealed
+    }, 1000); // Increased delay to ensure cards are fully revealed
 
     return () => clearTimeout(timer);
   }, []);
 
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -31,39 +32,9 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Get user data from localStorage
-      const storedUserData = localStorage.getItem('userData');
-      if (!storedUserData) {
-        throw new Error('User not found');
-      }
-
-      const userData = JSON.parse(storedUserData);
-      if (userData.email !== formData.email) {
-        throw new Error('Invalid email or password');
-      }
-
-      // In a real app, you would verify the password here
-      // For demo purposes, we'll just check if it's not empty
-      if (!formData.password) {
-        throw new Error('Password is required');
-      }
-
-      // Redirect to dashboard
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    onLogin(formData);
   };
 
   const googleLogin = useGoogleLogin({
@@ -119,7 +90,7 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      <div className={`credit-cards-wrapper ${shiftCards ? 'shift-left' : ''}`}>
+      <div className="credit-cards-wrapper">
         <CreditCardAnimation />
       </div>
       <div className={`login-content ${shiftCards ? 'slide-in' : ''}`}>
@@ -127,34 +98,49 @@ const Login = () => {
           <Link to="/" className="login-logo">
             FlexPay
           </Link>
-          <h1>Welcome back</h1>
-          <p>Don't have an account? <Link to="/register" className="signup-link">Sign up</Link></p>
+          <h1>Welcome Back</h1>
+          <p>Sign in to your account to continue</p>
         </div>
 
         {error && <div className="error-message">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="login-form">
+        <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="name">Full Name</label>
             <input
-              type="email"
+              id="name"
+              name="name"
+              type="text"
+              required
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">Email address</label>
+            <input
               id="email"
               name="email"
-              value={formData.email}
-              onChange={handleInputChange}
+              type="email"
               required
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
-              type="password"
               id="password"
               name="password"
-              value={formData.password}
-              onChange={handleInputChange}
+              type="password"
               required
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
             />
           </div>
 
@@ -180,11 +166,17 @@ const Login = () => {
               alt="Google"
               className="google-icon"
             />
-            {loading ? 'Signing in...' : 'Continue with Google'}
+            Continue with Google
           </button>
         </form>
 
         <div className="login-footer">
+          <p>
+            Don't have an account?{' '}
+            <Link to="/register" className="signup-link">
+              Sign up
+            </Link>
+          </p>
           <Link to="/forgot-password" className="forgot-password">
             Forgot your password?
           </Link>

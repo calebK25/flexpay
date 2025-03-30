@@ -2,7 +2,6 @@
   "name": "flexpay-demo",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8000",
   "dependencies": {
     "@react-oauth/google": "^0.12.1",
     "@testing-library/jest-dom": "^5.17.0",
@@ -10,6 +9,12 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.8.4",
     "chart.js": "^4.4.8",
+    "concurrently": "^9.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "knotapi-js": "^1.0.0",
+    "plaid": "^18.3.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.2.0",
@@ -22,7 +27,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "server": "node server.js",
+    "dev": "concurrently \"npm run start\" \"npm run server\""
   },
   "eslintConfig": {
     "extends": [
