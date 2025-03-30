@@ -1,5 +1,4 @@
 const express = require('express');
-const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { getKnotClient } = require('./knotUtils');
@@ -19,82 +18,18 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.json());
 
-// Get environment from .env file
-const environment = process.env.PLAID_ENV || 'sandbox';
-const basePath = environment === 'production' 
-  ? PlaidEnvironments.production 
-  : PlaidEnvironments.sandbox;
-
-const configuration = new Configuration({
-  basePath,
-  baseOptions: {
-    headers: {
-      'PLAID-CLIENT-ID': process.env.REACT_APP_PLAID_CLIENT_ID,
-      'PLAID-SECRET': process.env.REACT_APP_PLAID_SECRET,
-      'Plaid-Version': '2020-09-14'
-    },
-  },
-});
-
-const plaidClient = new PlaidApi(configuration);
-
 // Initialize Knot client
 const knotClient = getKnotClient();
 
-// Create Plaid link token
-app.post('/api/create-link-token', async (req, res) => {
-  try {
-    console.log('Creating Plaid link token...');
-    
-    if (!process.env.REACT_APP_PLAID_CLIENT_ID || !process.env.REACT_APP_PLAID_SECRET) {
-      console.error('Plaid credentials not configured');
-      return res.status(500).json({ 
-        error: 'Plaid credentials not configured',
-        details: 'Please check your environment variables'
-      });
-    }
-
-    // Generate a unique user ID for this session
-    const userId = `user_${Date.now()}`;
-    
-    const request = {
-      user: { client_user_id: userId },
-      client_name: 'FlexPay Demo',
-      products: ['transactions'],
-      country_codes: ['US'],
-      language: 'en'
-    };
-
-    console.log('Sending request to Plaid:', request);
-
-    const response = await plaidClient.linkTokenCreate(request);
-    
-    console.log('Plaid response:', response.data);
-
-    if (!response.data || !response.data.link_token) {
-      throw new Error('No link token received from Plaid');
-    }
-
-    return res.json({
-      link_token: response.data.link_token
-    });
-  } catch (error) {
-    console.error('Error creating Plaid link token:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status
-    });
-    
-    return res.status(500).json({
-      error: 'Failed to create link token',
-      details: error.message
-    });
-  }
+app.get('/test', (req, res) => {
+  res.send('Server is running');
 });
 
 // Webhook endpoint for Knot API events
 app.post('/webhook/knot', async (req, res) => {
   try {
+    console.log("Received webhook request body:", JSON.stringify(req.body, null, 2));
+    
     const { event_type, data } = req.body;
     
     if (!event_type) {
@@ -104,60 +39,108 @@ app.post('/webhook/knot', async (req, res) => {
         details: 'The event_type parameter is required in the webhook request'
       });
     }
-    
+
+    let response = { received: true };
+
     switch (event_type) {
+      case 'card':
+        console.log('Card event received:', data);
+        try {
+          // Call the /card endpoint to add the card using POST
+          const myHeaders = new Headers();
+          myHeaders.append("Content-Type", "application/json");
+
+          // Replace "your_username" and "your_password" with your actual credentials
+          const credentials = btoa("23c681b3-86c2-4afc-a893-93b851681283:d540d93a7d544cbaa1ee501780a6c347");
+          myHeaders.append("Authorization", "Basic " + credentials);
+
+          const raw = JSON.stringify({
+            "task_id": data.task_id || "35205", // Use task_id from data or default
+            "user": {
+              "name": {
+                "first_name": "Ada",
+                "last_name": "Lovelace"
+              },
+              "phone_number": "+11234567890",
+              "address": {
+                "street": "100 Main Street",
+                "street2": "#100",
+                "city": "New York",
+                "region": "NY",
+                "postal_code": "12345",
+                "country": "US"
+              }
+            },
+            "card": {
+              "number": "4242424242424242",
+              "expiration": "08/2025",
+              "cvv": "123"
+            }
+          });
+
+          console.log('Sending request to Knot API with body:', raw);
+
+          const requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow"
+          };
+
+          const knotResponse = await fetch("https://development.knotapi.com/card", requestOptions);
+          const result = await knotResponse.text();
+          console.log('Knot API response:', result);
+
+          response = { 
+            success: true, 
+            message: 'Card added successfully',
+            data: result 
+          };
+        } catch (cardError) {
+          console.error('Error adding card:', cardError);
+          response = { 
+            error: 'Failed to add card',
+            details: cardError.message
+          };
+        }
+        break;
+
       case 'card_switch_success':
         console.log('Card switch successful:', data);
+        response = { success: true, message: 'Card switch successful', data };
         break;
 
       case 'card_switch_failed':
         console.log('Card switch failed:', data);
+        response = { success: false, message: 'Card switch failed', data };
         break;
 
       case 'payment_success':
         console.log('Payment successful:', data);
+        response = { success: true, message: 'Payment successful', data };
         break;
 
       case 'payment_failed':
         console.log('Payment failed:', data);
+        response = { success: false, message: 'Payment failed', data };
         break;
 
       default:
         console.log('Unhandled event type:', event_type);
+        response = { 
+          success: false, 
+          message: 'Unhandled event type',
+          event_type 
+        };
     }
 
-    res.status(200).json({ received: true });
+    // Always send a response
+    return res.status(200).json(response);
   } catch (error) {
     console.error('Webhook error:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'Webhook processing failed',
       details: error.message
-    });
-  }
-});
-
-// Create processor token for Knot integration
-app.post('/api/create-processor-token', async (req, res) => {
-  try {
-    const { access_token, account_id } = req.body;
-    
-    if (!access_token || !account_id) {
-      return res.status(400).json({ error: 'Missing required parameters' });
-    }
-
-    const request = {
-      access_token,
-      account_id,
-      processor: 'knot'
-    };
-
-    const response = await plaidClient.processorTokenCreate(request);
-    res.json({ processor_token: response.data.processor_token });
-  } catch (error) {
-    console.error('Error creating processor token:', error);
-    res.status(500).json({ 
-      error: 'Failed to create processor token',
-      details: error.response?.data || error.message 
     });
   }
 });
@@ -254,62 +237,101 @@ app.post('/api/create-knot-session', async (req, res) => {
   }
 });
 
-// Exchange Plaid public token for access token
-app.post('/api/exchange-token', async (req, res) => {
+// Add credit limit adjustment endpoint
+app.post('/api/adjust-credit-limit', async (req, res) => {
   try {
-    const { public_token } = req.body;
+    const { userId, transactionData } = req.body;
     
-    if (!public_token) {
-      return res.status(400).json({ 
-        error: 'Public token is required',
-        details: 'The public_token parameter is missing from the request body'
+    if (!userId || !transactionData) {
+      return res.status(400).json({
+        error: 'Missing required data',
+        details: 'userId and transactionData are required'
       });
     }
 
-    console.log('Exchanging public token for access token...');
+    // Get current credit limit from storage (in production, this would be from a database)
+    let currentLimit = 10000; // Default limit
 
-    const response = await plaidClient.itemPublicTokenExchange({
-      public_token: public_token
-    });
+    // Calculate risk score based on transaction data
+    const riskScore = calculateRiskScore(transactionData);
+    
+    // Determine new credit limit based on risk score
+    let newLimit = currentLimit;
+    if (riskScore >= 0.7) {
+      newLimit = currentLimit * 1.2; // 20% increase for low risk
+    } else if (riskScore >= 0.5) {
+      newLimit = currentLimit; // No change for medium risk
+    } else if (riskScore >= 0.3) {
+      newLimit = currentLimit * 0.8; // 20% decrease for high risk
+    } else {
+      newLimit = currentLimit * 0.5; // 50% decrease for critical risk
+    }
 
-    console.log('Token exchange successful:', response.data);
+    // Ensure the new limit stays within reasonable bounds
+    const minLimit = 1000; // Minimum $1,000
+    const maxLimit = 50000; // Maximum $50,000
+    newLimit = Math.min(Math.max(newLimit, minLimit), maxLimit);
+
+    // Log the adjustment
+    console.log(`Credit limit adjustment for user ${userId}:
+      Previous limit: $${currentLimit}
+      New limit: $${newLimit}
+      Risk score: ${riskScore}
+      Transaction data: ${JSON.stringify(transactionData)}
+    `);
 
     return res.json({
-      access_token: response.data.access_token,
-      item_id: response.data.item_id
+      success: true,
+      newCreditLimit: newLimit,
+      riskScore,
+      previousLimit: currentLimit
     });
   } catch (error) {
-    console.error('Error exchanging token:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status
-    });
-    
+    console.error('Error adjusting credit limit:', error);
     return res.status(500).json({
-      error: 'Failed to exchange token',
+      error: 'Failed to adjust credit limit',
       details: error.message
     });
   }
 });
 
+// Helper function to calculate risk score
+function calculateRiskScore(transactionData) {
+  const {
+    missedPayments = 0,
+    totalPayments = 0,
+    averageTransactionAmount = 0,
+    maxTransactionAmount = 0,
+    accountAge = 0,
+    creditUtilization = 0
+  } = transactionData;
+
+  // Calculate individual risk factors
+  const missedPaymentScore = 1 - (missedPayments / Math.max(totalPayments, 1));
+  const transactionVolatilityScore = 1 - (maxTransactionAmount / (averageTransactionAmount * 2));
+  const accountAgeScore = Math.min(1, accountAge / 2); // Max score after 2 years
+  const utilizationScore = 1 - creditUtilization;
+
+  // Weighted average of risk factors
+  const riskScore = (
+    missedPaymentScore * 0.3 +
+    transactionVolatilityScore * 0.2 +
+    accountAgeScore * 0.2 +
+    utilizationScore * 0.3
+  );
+
+  return Math.max(0, Math.min(1, riskScore));
+}
+
 // Add error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).json({
-    error: 'Internal server error',
-    message: err.message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
-  });
+app.use((req, res, next) => {
+  console.log(`Received request: ${req.method} ${req.url}`);
+  next();
 });
 
-// const PORT = process.env.PORT || 3001;
-const PORT = process.env.PORT;
+const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} in ${environment} mode`);
+  console.log(`Server running on port ${PORT}`);
   console.log('Environment:', process.env.NODE_ENV || 'development');
   console.log('Knot API Key configured:', !!process.env.REACT_APP_KNOT_API_KEY);
-  console.log('Plaid credentials configured:', {
-    clientId: !!process.env.REACT_APP_PLAID_CLIENT_ID,
-    secret: !!process.env.REACT_APP_PLAID_SECRET
-  });
 }); 

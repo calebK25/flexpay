@@ -5,6 +5,7 @@ import LimitHistoryGraph from './LimitHistoryGraph';
 import Notification from './Notification';
 import { getPlaidTransactions } from '../utils/plaidUtils';
 import { getLinkedCards, linkCard } from '../utils/knotUtils';
+import ActivePaymentPlans from './ActivePaymentPlans';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -16,6 +17,8 @@ const Dashboard = () => {
   const [notification, setNotification] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [activePaymentPlans, setActivePaymentPlans] = useState([]);
+  const [activePlans, setActivePlans] = useState([]);
+  const [paymentHistory, setPaymentHistory] = useState([]);
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('userData');
@@ -55,6 +58,14 @@ const Dashboard = () => {
     // Load active payment plans from localStorage
     const savedPlans = JSON.parse(localStorage.getItem('activePaymentPlans') || '[]');
     setActivePaymentPlans(savedPlans);
+  }, []);
+
+  useEffect(() => {
+    // Load active plans and payment history
+    const plans = JSON.parse(localStorage.getItem('activePaymentPlans') || '[]');
+    const history = JSON.parse(localStorage.getItem('paymentHistory') || '[]');
+    setActivePlans(plans.filter(plan => plan.status === 'active'));
+    setPaymentHistory(history);
   }, []);
 
   const calculateInitialRiskScore = (data) => {
@@ -249,6 +260,7 @@ const Dashboard = () => {
   };
 
   const handlePayNow = (plan) => {
+    // Update plan status
     const updatedPlans = activePaymentPlans.map(p => {
       if (p.id === plan.id) {
         // Increment the payment count
@@ -259,7 +271,7 @@ const Dashboard = () => {
         nextPaymentDate.setDate(nextPaymentDate.getDate() + 30);
 
         // Update plan status based on payment progress
-        const status = newPayments >= p.totalPayments ? 'completed' : 'pending';
+        const status = newPayments >= p.totalPayments ? 'completed' : 'active';
 
         return {
           ...p,
@@ -276,14 +288,14 @@ const Dashboard = () => {
     setActivePaymentPlans(updatedPlans);
     localStorage.setItem('activePaymentPlans', JSON.stringify(updatedPlans));
 
-    // Update user data and risk assessment
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    // Create updated user data object
+    const updatedUserData = { ...userData };
     
     // Add payment to history
-    if (!userData.paymentHistory) {
-      userData.paymentHistory = [];
+    if (!updatedUserData.paymentHistory) {
+      updatedUserData.paymentHistory = [];
     }
-    userData.paymentHistory.push({
+    updatedUserData.paymentHistory.push({
       id: plan.id,
       amount: plan.monthlyPayment,
       date: new Date().toISOString(),
@@ -292,13 +304,13 @@ const Dashboard = () => {
     });
 
     // Calculate new risk score based on payment history
-    const paymentHistory = userData.paymentHistory;
+    const paymentHistory = updatedUserData.paymentHistory;
     const totalPayments = paymentHistory.length;
     const onTimePayments = paymentHistory.filter(p => p.status === 'paid').length;
     const paymentSuccessRate = onTimePayments / totalPayments;
 
     // Get current risk score
-    const currentRiskScore = userData.riskHistory[userData.riskHistory.length - 1].score;
+    const currentRiskScore = updatedUserData.riskHistory[updatedUserData.riskHistory.length - 1].score;
 
     // Calculate new risk score (improve by 5% for on-time payment)
     const newRiskScore = Math.max(
@@ -307,16 +319,16 @@ const Dashboard = () => {
     );
 
     // Update risk history
-    if (!userData.riskHistory) {
-      userData.riskHistory = [];
+    if (!updatedUserData.riskHistory) {
+      updatedUserData.riskHistory = [];
     }
-    userData.riskHistory.push({
+    updatedUserData.riskHistory.push({
       date: new Date().toISOString(),
       score: newRiskScore
     });
 
     // Update spending limit based on new risk score
-    const oldLimit = userData.spendingLimit;
+    const oldLimit = updatedUserData.spendingLimit;
     let newLimit = oldLimit;
     let reason = '';
 
@@ -335,11 +347,11 @@ const Dashboard = () => {
     }
 
     if (newLimit !== oldLimit) {
-      userData.spendingLimit = newLimit;
-      if (!userData.limitHistory) {
-        userData.limitHistory = [];
+      updatedUserData.spendingLimit = newLimit;
+      if (!updatedUserData.limitHistory) {
+        updatedUserData.limitHistory = [];
       }
-      userData.limitHistory.push({
+      updatedUserData.limitHistory.push({
         date: new Date().toISOString(),
         limit: newLimit,
         change: {
@@ -348,16 +360,29 @@ const Dashboard = () => {
           reason
         }
       });
+
+      // Set limit change notification
+      setLimitChange({
+        amount: newLimit - oldLimit,
+        percentage: ((newLimit - oldLimit) / oldLimit) * 100,
+        reason
+      });
     }
 
-    // Save updated user data
-    localStorage.setItem('userData', JSON.stringify(userData));
+    // Update state and localStorage atomically
+    setUserData(updatedUserData);
+    localStorage.setItem('userData', JSON.stringify(updatedUserData));
 
-    // Show success notification
+    // Show success notification with payment progress
+    const paymentProgress = `${plan.payments + 1}/${plan.totalPayments} months paid`;
     setNotification({
       type: 'success',
-      message: `Payment of $${plan.monthlyPayment.toFixed(2)} processed successfully!`
+      message: `Payment processed: ${paymentProgress}`
     });
+
+    // Update active plans and payment history states
+    setActivePlans(updatedPlans.filter(p => p.status === 'active'));
+    setPaymentHistory(updatedUserData.paymentHistory);
   };
 
   const handleMarkAsMissed = (plan) => {
@@ -371,14 +396,14 @@ const Dashboard = () => {
     setActivePaymentPlans(updatedPlans);
     localStorage.setItem('activePaymentPlans', JSON.stringify(updatedPlans));
 
-    // Update user data and risk assessment
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    // Create updated user data object
+    const updatedUserData = { ...userData };
     
     // Add missed payment to history
-    if (!userData.paymentHistory) {
-      userData.paymentHistory = [];
+    if (!updatedUserData.paymentHistory) {
+      updatedUserData.paymentHistory = [];
     }
-    userData.paymentHistory.push({
+    updatedUserData.paymentHistory.push({
       id: plan.id,
       amount: plan.monthlyPayment,
       date: new Date().toISOString(),
@@ -387,7 +412,7 @@ const Dashboard = () => {
     });
 
     // Get current risk score
-    const currentRiskScore = userData.riskHistory[userData.riskHistory.length - 1].score;
+    const currentRiskScore = updatedUserData.riskHistory[updatedUserData.riskHistory.length - 1].score;
 
     // Calculate new risk score (increase by 20% for missed payment)
     const newRiskScore = Math.min(
@@ -396,16 +421,16 @@ const Dashboard = () => {
     );
 
     // Update risk history
-    if (!userData.riskHistory) {
-      userData.riskHistory = [];
+    if (!updatedUserData.riskHistory) {
+      updatedUserData.riskHistory = [];
     }
-    userData.riskHistory.push({
+    updatedUserData.riskHistory.push({
       date: new Date().toISOString(),
       score: newRiskScore
     });
 
     // Update spending limit based on new risk score
-    const oldLimit = userData.spendingLimit;
+    const oldLimit = updatedUserData.spendingLimit;
     let newLimit = oldLimit;
     let reason = '';
 
@@ -415,11 +440,11 @@ const Dashboard = () => {
     reason = "Missed payment detected";
 
     if (newLimit !== oldLimit) {
-      userData.spendingLimit = newLimit;
-      if (!userData.limitHistory) {
-        userData.limitHistory = [];
+      updatedUserData.spendingLimit = newLimit;
+      if (!updatedUserData.limitHistory) {
+        updatedUserData.limitHistory = [];
       }
-      userData.limitHistory.push({
+      updatedUserData.limitHistory.push({
         date: new Date().toISOString(),
         limit: newLimit,
         change: {
@@ -428,21 +453,38 @@ const Dashboard = () => {
           reason
         }
       });
+
+      // Set limit change notification
+      setLimitChange({
+        amount: newLimit - oldLimit,
+        percentage: ((newLimit - oldLimit) / oldLimit) * 100,
+        reason
+      });
     }
 
-    // Save updated user data
-    localStorage.setItem('userData', JSON.stringify(userData));
+    // Update state and localStorage atomically
+    setUserData(updatedUserData);
+    localStorage.setItem('userData', JSON.stringify(updatedUserData));
 
-    // Show notification
+    // Show notification with payment progress and limit change
+    const paymentProgress = `${plan.payments}/${plan.totalPayments} months paid`;
     setNotification({
       type: 'error',
-      message: `Missed payment of $${plan.monthlyPayment.toFixed(2)}. Risk score increased and spending limit decreased.`
+      message: `Payment missed: ${paymentProgress}. Your spending limit has been decreased by ${Math.abs(((newLimit - oldLimit) / oldLimit) * 100).toFixed(1)}%`
     });
+
+    // Update active plans and payment history states
+    setActivePlans(updatedPlans.filter(p => p.status === 'active'));
+    setPaymentHistory(updatedUserData.paymentHistory);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('userData');
+    navigate('/login');
   };
 
   if (!userData) return null;
 
-  const activePlans = userData.activePlans.filter(plan => plan.status === 'active');
   const completedPlans = userData.activePlans.filter(plan => plan.status === 'completed');
   const currentRiskScore = userData.riskHistory[userData.riskHistory.length - 1].score;
   const spendingLimit = userData.spendingLimit;
@@ -565,70 +607,53 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="active-payment-plans">
+        <div className="dashboard-section">
           <h2>Active Payment Plans</h2>
-          {activePaymentPlans.length === 0 ? (
-            <p className="no-plans">No active payment plans</p>
-          ) : (
-            <div className="plans-grid">
-              {activePaymentPlans.map((plan) => (
-                <div key={plan.id} className={`plan-card ${plan.status === 'missed' ? 'missed-payment' : ''}`}>
-                  <div className="plan-header">
-                    <h3>{plan.merchant}</h3>
-                    <span className={`plan-status ${plan.status}`}>
-                      {plan.status.charAt(0).toUpperCase() + plan.status.slice(1)}
-                    </span>
-                  </div>
-                  <div className="plan-details">
-                    <p>Amount: ${plan.amount.toFixed(2)}</p>
-                    <p>Payments: {plan.payments} of {plan.totalPayments}</p>
-                    <p>Card: {plan.cardBrand} •••• {plan.cardLastFour}</p>
-                    <p>Due Date: {new Date(plan.dueDate).toLocaleDateString()}</p>
-                  </div>
-                  <div className="plan-actions">
-                    {plan.status === 'pending' && (
-                      <>
-                        <button 
-                          className="pay-now-btn"
-                          onClick={() => handlePayNow(plan)}
-                        >
-                          Pay Now
-                        </button>
-                        <button 
-                          className="missed-btn"
-                          onClick={() => handleMarkAsMissed(plan)}
-                        >
-                          Mark as Missed
-                        </button>
-                      </>
-                    )}
-                  </div>
+          <div className="active-plans-horizontal">
+            {activePlans.map((plan, index) => (
+              <div key={index} className="plan-card">
+                <div className="plan-header">
+                  <h3>{plan.merchant}</h3>
+                  <span className="status active">Active</span>
                 </div>
-              ))}
-            </div>
-          )}
+                <div className="plan-details">
+                  <p>Total Amount: ${plan.amount}</p>
+                  <p>Monthly Payment: ${plan.monthlyPayment}</p>
+                </div>
+                <div className="plan-actions">
+                  <button 
+                    className="pay-now-btn"
+                    onClick={() => handlePayNow(plan)}
+                  >
+                    Pay Now
+                  </button>
+                  <button 
+                    className="missed-btn"
+                    onClick={() => handleMarkAsMissed(plan)}
+                  >
+                    Mark as Missed
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {completedPlans.length > 0 && (
-          <div className="completed-plans-section">
-            <h2>Completed Payment Plans</h2>
-            <div className="plans-grid">
-              {completedPlans.map(plan => (
-                <div key={plan.id} className="plan-card completed">
-                  <div className="plan-header">
-                    <h3>{plan.itemName}</h3>
-                    <span className="status completed">Completed</span>
-                  </div>
-                  <div className="plan-details">
-                    <p>Monthly Payment: ${plan.monthlyPayment.toFixed(2)}</p>
-                    <p>Total Payments: {plan.totalPayments}</p>
-                    <p>Completed On: {new Date(plan.nextPaymentDate).toLocaleDateString()}</p>
-                  </div>
+        <div className="dashboard-section">
+          <h2>Payment History</h2>
+          <div className="payment-history-horizontal">
+            {paymentHistory.map((payment, index) => (
+              <div key={index} className="payment-history-card">
+                <div className="payment-info">
+                  <h3>{payment.merchant}</h3>
+                  <p>Amount: ${payment.amount}</p>
+                  <p>Date: {new Date(payment.date).toLocaleDateString()}</p>
                 </div>
-              ))}
-            </div>
+                <span className="payment-status completed">Completed</span>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

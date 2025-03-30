@@ -11,48 +11,20 @@ const Transactions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [selectedTransaction, setSelectedTransaction] = useState(null);
-  const [availableCards, setAvailableCards] = useState([]);
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [showCardSelection, setShowCardSelection] = useState(false);
   const [notification, setNotification] = useState(null);
-  const [paymentPlan, setPaymentPlan] = useState(null);
-  const [showPaymentPlanModal, setShowPaymentPlanModal] = useState(false);
   const [showAddCard, setShowAddCard] = useState(false);
   const [userCards, setUserCards] = useState([]);
   const [supportedMerchants, setSupportedMerchants] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPaymentPlans, setShowPaymentPlans] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
 
-  // Payment plan options with monthly payment information
-  const paymentPlanOptions = [
-    { 
-      id: 'full', 
-      name: 'Pay in Full', 
-      payments: 1,
-      apr: '0%',
-      description: 'Pay the full amount immediately'
-    },
-    { 
-      id: '3month', 
-      name: '3 Month Plan', 
-      payments: 3,
-      apr: '5.99%',
-      description: 'Split into 3 monthly payments'
-    },
-    { 
-      id: '6month', 
-      name: '6 Month Plan', 
-      payments: 6,
-      apr: '7.99%',
-      description: 'Split into 6 monthly payments'
-    },
-    { 
-      id: '12month', 
-      name: '12 Month Plan', 
-      payments: 12,
-      apr: '9.99%',
-      description: 'Split into 12 monthly payments'
-    }
+  // Payment plan options
+  const paymentPlans = [
+    { id: 'full', name: 'Pay in Full', months: 1, interestRate: 0 },
+    { id: '3month', name: '3 Month Plan', months: 3, interestRate: 5.99 },
+    { id: '6month', name: '6 Month Plan', months: 6, interestRate: 7.99 },
+    { id: '12month', name: '12 Month Plan', months: 12, interestRate: 9.99 }
   ];
 
   useEffect(() => {
@@ -87,90 +59,6 @@ const Transactions = () => {
     });
   };
 
-  const handleTransactionClick = async (transaction) => {
-    try {
-      setSelectedTransaction(transaction);
-      // Combine user's saved cards with available cards
-      const allCards = [...userCards, ...(await getAvailableCards(transaction.id))];
-      setAvailableCards(allCards);
-      setShowCardSelection(true);
-      setShowPaymentPlanModal(true);
-    } catch (err) {
-      setError('Failed to fetch available cards');
-      console.error('Error fetching available cards:', err);
-    }
-  };
-
-  const handleCardSelect = (card) => {
-    setSelectedCard(card);
-  };
-
-  const handlePaymentPlanSelect = (plan) => {
-    setPaymentPlan(plan);
-  };
-
-  const handleSwitchCard = async () => {
-    if (!selectedTransaction || !selectedCard || !paymentPlan) return;
-
-    try {
-      await switchCard(selectedTransaction.id, selectedCard.id);
-      
-      // Calculate monthly payment amount
-      const monthlyPayment = paymentPlan.payments === 1 
-        ? selectedTransaction.amount 
-        : (selectedTransaction.amount / paymentPlan.payments).toFixed(2);
-
-      // Create a new payment plan
-      const newPlan = {
-        id: `plan_${Math.random().toString(36).substr(2, 9)}`,
-        merchant: selectedTransaction.merchant,
-        amount: selectedTransaction.amount,
-        monthlyPayment: parseFloat(monthlyPayment),
-        payments: 0,
-        totalPayments: paymentPlan.payments,
-        cardBrand: selectedCard.brand,
-        cardLastFour: selectedCard.last_four,
-        dueDate: new Date().toISOString(),
-        nextPaymentDate: new Date().toISOString(),
-        status: 'pending',
-        apr: paymentPlan.apr
-      };
-
-      // Get existing plans from localStorage
-      const existingPlans = JSON.parse(localStorage.getItem('activePaymentPlans') || '[]');
-      
-      // Add the new plan
-      const updatedPlans = [...existingPlans, newPlan];
-      
-      // Save to localStorage
-      localStorage.setItem('activePaymentPlans', JSON.stringify(updatedPlans));
-
-      // Update user data with new payment plan
-      const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-      if (!userData.paymentHistory) {
-        userData.paymentHistory = [];
-      }
-      if (!userData.riskHistory) {
-        userData.riskHistory = [{
-          date: new Date().toISOString(),
-          score: 0.5 // Initial risk score
-        }];
-      }
-      localStorage.setItem('userData', JSON.stringify(userData));
-
-      setNotification({
-        type: 'success',
-        message: `Card switched successfully! Payment plan: ${paymentPlan.name}`
-      });
-      setShowCardSelection(false);
-      setShowPaymentPlanModal(false);
-      fetchTransactions(); // Refresh transactions
-    } catch (err) {
-      setError('Failed to switch card');
-      console.error('Error switching card:', err);
-    }
-  };
-
   const handleCloseNotification = () => {
     setNotification(null);
   };
@@ -188,14 +76,50 @@ const Transactions = () => {
     }
   };
 
-  const handleOpenTransactionLink = async (merchantId) => {
+  const handlePayClick = (transaction) => {
+    setSelectedTransaction(transaction);
+    setShowPaymentPlans(true);
+  };
+
+  const handlePaymentPlanSelect = async (plan) => {
     try {
-      setError(null);
       setLoading(true);
-      await knotSDK.openTransactionLink(merchantId);
+      
+      // Calculate monthly payment amount
+      const monthlyPayment = (selectedTransaction.amount / plan.months).toFixed(2);
+      
+      // Create a new payment plan
+      const newPlan = {
+        id: `plan_${Math.random().toString(36).substr(2, 9)}`,
+        merchant: selectedTransaction.merchant,
+        amount: selectedTransaction.amount,
+        monthlyPayment: parseFloat(monthlyPayment),
+        payments: 0,
+        totalPayments: plan.months,
+        dueDate: new Date().toISOString(),
+        nextPaymentDate: new Date().toISOString(),
+        status: 'active',
+        apr: plan.interestRate,
+        planName: plan.name
+      };
+
+      // Get existing plans from localStorage
+      const existingPlans = JSON.parse(localStorage.getItem('activePaymentPlans') || '[]');
+      
+      // Add the new plan
+      const updatedPlans = [...existingPlans, newPlan];
+      
+      // Save to localStorage
+      localStorage.setItem('activePaymentPlans', JSON.stringify(updatedPlans));
+
+      setNotification({
+        type: 'success',
+        message: `Payment plan created: ${plan.name}`
+      });
+      setShowPaymentPlans(false);
     } catch (error) {
-      console.error('Error opening transaction link:', error);
-      setError('Failed to open transaction link. Please try again.');
+      setError('Failed to create payment plan');
+      console.error('Error creating payment plan:', error);
     } finally {
       setLoading(false);
     }
@@ -223,118 +147,82 @@ const Transactions = () => {
           <div
             key={transaction.id}
             className="transaction-card"
-            onClick={() => handleTransactionClick(transaction)}
           >
             <div className="transaction-info">
               <h3>{transaction.merchant}</h3>
               <p className="transaction-date">
                 {new Date(transaction.date).toLocaleDateString()}
               </p>
-              </div>
+            </div>
             <div className="transaction-amount">
               ${transaction.amount.toFixed(2)}
             </div>
             <div className="transaction-actions">
               <button 
                 className="card-switch-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenCardSwitcher(transaction.merchant_id);
-                }}
+                onClick={() => handleOpenCardSwitcher(transaction.merchant_id)}
                 disabled={loading}
               >
                 Switch Card
               </button>
               <button 
-                className="transaction-link-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenTransactionLink(transaction.merchant_id);
-                }}
+                className="pay-btn"
+                onClick={() => handlePayClick(transaction)}
                 disabled={loading}
               >
-                Link Transaction
-            </button>
-        </div>
+                Pay
+              </button>
+            </div>
           </div>
         ))}
       </div>
 
-      {showCardSelection && (
-        <div className="card-selection-modal">
+      {showPaymentPlans && selectedTransaction && (
+        <div className="payment-plans-modal">
           <div className="modal-content">
-            <h2>Select Payment Method</h2>
-            <div className="cards-grid">
-              {availableCards.map((card) => (
-                <div
-                  key={card.id}
-                  className={`card-option ${selectedCard?.id === card.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedCard(card)}
-                >
-                  <div className="card-brand">{card.brand}</div>
-                  <div className="card-number">•••• {card.last_four}</div>
-                  <div className="card-expiry">Expires {card.expiry}</div>
-                </div>
-              ))}
-      </div>
-
-            <div className="payment-plan-section">
-              <h3>Select Payment Plan</h3>
-              <div className="payment-plan-grid">
-                {paymentPlanOptions.map((plan) => (
-                  <div
-                    key={plan.id}
-                    className={`payment-plan-option ${paymentPlan?.id === plan.id ? 'selected' : ''}`}
+            <h2>Select Payment Plan</h2>
+            <p>Amount: ${selectedTransaction.amount.toFixed(2)}</p>
+            <div className="payment-plans-grid">
+              {paymentPlans.map((plan) => {
+                const monthlyPayment = (selectedTransaction.amount / plan.months).toFixed(2);
+                return (
+                  <div 
+                    key={plan.id} 
+                    className="payment-plan-card"
                     onClick={() => handlePaymentPlanSelect(plan)}
                   >
-                    <div className="plan-name">{plan.name}</div>
-                    <div className="plan-payments">
-                      {plan.payments} payment{plan.payments > 1 ? 's' : ''}
-          </div>
-                    <div className="plan-apr">
-                      <span className="apr-label">APR:</span>
-                      <span className="apr-value">{plan.apr}</span>
-          </div>
-                    <div className="plan-description">{plan.description}</div>
-          </div>
-                ))}
+                    <h3>{plan.name}</h3>
+                    <div className="plan-details">
+                      <p>${monthlyPayment}/month</p>
+                      <p>{plan.months} payments</p>
+                      <p>APR: {plan.interestRate}%</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <button 
+              className="close-modal-btn"
+              onClick={() => setShowPaymentPlans(false)}
+            >
+              Close
+            </button>
           </div>
         </div>
-
-            <div className="modal-actions">
-              <button
-                className="switch-card-btn"
-                onClick={handleSwitchCard}
-                disabled={!selectedCard || !paymentPlan}
-              >
-                Confirm Payment Method
-              </button>
-              <button 
-                className="cancel-btn" 
-                onClick={() => {
-                  setShowCardSelection(false);
-                  setShowPaymentPlanModal(false);
-                }}
-              >
-                Cancel
-              </button>
-                </div>
-              </div>
-        </div>
-      )}
-
-      {showAddCard && (
-        <AddCard
-          onClose={() => setShowAddCard(false)}
-          onAddCard={handleAddCard}
-        />
       )}
 
       {notification && (
         <Notification
           type={notification.type}
           message={notification.message}
-          onClose={() => setNotification(null)}
+          onClose={handleCloseNotification}
+        />
+      )}
+
+      {showAddCard && (
+        <AddCard
+          onClose={() => setShowAddCard(false)}
+          onAddCard={handleAddCard}
         />
       )}
     </div>

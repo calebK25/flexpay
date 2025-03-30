@@ -1,8 +1,5 @@
 .transactions-container {
-  padding: 1.5rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -14,1191 +11,202 @@
   margin-bottom: 20px;
 }
 
-.header-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-.transactions-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.add-card-btn {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.add-card-btn:hover {
-  background: #218838;
-}
-
-.add-card-btn::before {
-  content: "+";
-  font-size: 1.25rem;
-  font-weight: 400;
-}
-
-.add-card-form {
-  background: #f9fafb;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.add-card-form h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-}
-
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  color: #111827;
-  background: white;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-
-.form-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.submit-btn {
-  padding: 0.75rem 1.5rem;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.submit-btn:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
-}
-
-.cancel-btn {
-  padding: 0.75rem 1.5rem;
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cancel-btn:hover {
-  background: #e5e7eb;
-  transform: translateY(-1px);
-}
-
 .transactions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  gap: 20px;
 }
 
-.transaction-item {
-  background: #f9fafb;
+.transaction-card {
+  background: white;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-.transaction-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.transaction-header {
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
 }
 
 .transaction-info h3 {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #111827;
+  color: #333;
 }
 
 .transaction-date {
-  font-size: 0.875rem;
-  color: #6b7280;
+  color: #666;
+  font-size: 0.9em;
+  margin: 5px 0 0 0;
 }
 
 .transaction-amount {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #111827;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #2c5282;
 }
 
-.transaction-details {
-  padding: 1rem;
-}
-
-.transaction-status {
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.status {
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-}
-
-.status.ordered {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.status.shipped {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.status.delivered {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.status.cancelled {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.status.completed {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.status.pending {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.payment-options h4 {
-  margin: 0 0 1rem 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #374151;
-}
-
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.card-option {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid #ddd;
+.transaction-actions {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
-.card-option:hover {
-  background: #e9ecef;
-  transform: translateY(-2px);
-}
-
-.card-option.selected {
-  background: #e3f2fd;
-  border-color: #007bff;
-}
-
-.card-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f9fafb;
-  border-radius: 6px;
-  padding: 0.5rem;
-}
-
-.card-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.card-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.card-number {
-  color: #333;
-  font-size: 1.1em;
-  font-weight: 500;
-  background: #f8f9fa;
-  padding: 4px 8px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.card-expiry {
-  color: #666;
-  font-size: 0.9em;
-}
-
-.create-plan-btn {
-  padding: 0.5rem 1rem;
-  background: #3b82f6;
-  color: white;
+.card-switch-btn,
+.pay-btn {
+  padding: 8px 16px;
   border: none;
-  border-radius: 6px;
-  font-weight: 500;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
-.create-plan-btn:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
+.card-switch-btn {
+  background-color: #4299e1;
+  color: white;
 }
 
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  color: #6b7280;
+.pay-btn {
+  background-color: #48bb78;
+  color: white;
 }
 
-.error {
-  padding: 1rem;
-  background: #fef2f2;
-  color: #991b1b;
-  border-radius: 6px;
-  border: 1px solid #fee2e2;
+.card-switch-btn:hover {
+  background-color: #3182ce;
 }
 
-.modal-overlay {
+.pay-btn:hover {
+  background-color: #38a169;
+}
+
+.card-switch-btn:disabled,
+.pay-btn:disabled {
+  background-color: #cbd5e0;
+  cursor: not-allowed;
+}
+
+.add-card-btn {
+  background-color: #4299e1;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.add-card-btn:hover {
+  background-color: #3182ce;
+}
+
+/* Payment Plans Modal */
+.payment-plans-modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 1000;
 }
 
 .modal-content {
   background: white;
-  padding: 2rem;
-  border-radius: 12px;
+  padding: 30px;
+  border-radius: 8px;
   width: 90%;
-  max-width: 500px;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content h2 {
+  margin: 0 0 20px 0;
+  color: #2d3748;
+}
+
+.payment-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.payment-plan-card {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payment-plan-card:hover {
+  transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-color: #4299e1;
 }
 
-.modal-content h3 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.payment-summary {
-  background: #f9fafb;
-  padding: 1rem;
-  border-radius: 6px;
-  margin: 1rem 0;
-}
-
-.payment-summary p {
-  margin: 0.5rem 0;
-  color: #374151;
-}
-
-.payment-summary p:first-child {
-  margin-top: 0;
-}
-
-.payment-summary p:last-child {
-  margin-bottom: 0;
-}
-
-.payment-plan-info {
-  background: #f9fafb;
-  padding: 1rem;
-  border-radius: 6px;
-  margin-top: 1rem;
-}
-
-.payment-plan-info h4 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #374151;
+.payment-plan-card h3 {
+  margin: 0 0 15px 0;
+  color: #2d3748;
 }
 
 .plan-details {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  color: #4a5568;
 }
 
 .plan-details p {
-  margin: 0;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.card-select {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  color: #111827;
-  background: white;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 1.5em 1.5em;
-  padding-right: 2.5rem;
-}
-
-.card-select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.card-select option {
-  padding: 0.5rem;
-}
-
-.transaction-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.transaction-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.transaction-card.selected {
-  border: 2px solid #007bff;
-  background-color: #f8f9fa;
-}
-
-.transaction-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.transaction-info h3 {
-  margin: 0 0 10px 0;
-  color: #333;
-}
-
-.transaction-info p {
   margin: 5px 0;
-  color: #666;
 }
 
-.transaction-amount {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.transaction-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  padding-top: 15px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.card-switch-btn,
-.transaction-link-btn {
-  flex: 1;
+.close-modal-btn {
+  background-color: #e2e8f0;
+  color: #4a5568;
   padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
   border: none;
-  font-size: 0.9rem;
-}
-
-.card-switch-btn {
-  background: #10b981;
-  color: white;
-}
-
-.card-switch-btn:hover {
-  background: #059669;
-}
-
-.transaction-link-btn {
-  background: #3b82f6;
-  color: white;
-}
-
-.transaction-link-btn:hover {
-  background: #2563eb;
-}
-
-.card-switch-btn:disabled,
-.transaction-link-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.payment-methods {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.payment-method {
-  background: #f8f9fa;
-  padding: 8px 12px;
   border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.card-brand {
-  font-weight: 500;
-  color: #333;
-}
-
-.card-last4 {
-  color: #fff;
-  background: #333;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 0.9em;
-}
-
-.payment-plan-section {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.payment-plan-section h3 {
-  margin-bottom: 1.5rem;
-  color: #1f2937;
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.payment-plan-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.payment-plan-option {
-  background: #ffffff;
-  padding: 1.25rem;
-  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.payment-plan-option:hover {
-  background: #f9fafb;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.payment-plan-option.selected {
-  background: #eff6ff;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.plan-name {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 1.1rem;
-}
-
-.plan-payments {
-  color: #4b5563;
-  font-size: 0.95rem;
-}
-
-.plan-apr {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: #f3f4f6;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.apr-label {
-  color: #6b7280;
-}
-
-.apr-value {
-  color: #1f2937;
-  font-weight: 600;
-}
-
-.plan-description {
-  color: #6b7280;
-  font-size: 0.875rem;
-  line-height: 1.4;
-}
-
-.modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.modal-content h2 {
-  margin-bottom: 1.5rem;
-  color: #1f2937;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.card-option {
-  background: #ffffff;
-  padding: 1.25rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.card-option:hover {
-  background: #f9fafb;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.card-option.selected {
-  background: #eff6ff;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.card-brand {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 1.1rem;
-}
-
-.card-number {
-  color: #1f2937;
-  font-size: 1.1rem;
   font-weight: 500;
-  background: #f3f4f6;
-  padding: 0.5rem;
-  border-radius: 4px;
-  display: inline-block;
+  transition: background-color 0.2s;
 }
 
-.card-expiry {
-  color: #6b7280;
-  font-size: 0.9rem;
+.close-modal-btn:hover {
+  background-color: #cbd5e0;
 }
 
-.modal-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
-  position: sticky;
-  bottom: 0;
-  background: white;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+/* Loading and Error States */
+.loading,
+.error {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2em;
 }
 
-.switch-card-btn,
-.cancel-btn {
-  flex: 1;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+.error {
+  color: #e53e3e;
 }
 
-.switch-card-btn {
-  background: #3b82f6;
-  color: white;
-  border: none;
-}
-
-.switch-card-btn:hover:not(:disabled) {
-  background: #2563eb;
-}
-
-.switch-card-btn:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
-
-.cancel-btn {
-  background: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
-}
-
-.cancel-btn:hover {
-  background: #e5e7eb;
-}
-
-.transaction-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.card-switch-btn,
-.transaction-link-btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-}
-
-.card-switch-btn {
-  background: #10b981;
-  color: white;
-}
-
-.card-switch-btn:hover {
-  background: #059669;
-}
-
-.transaction-link-btn {
-  background: #3b82f6;
-  color: white;
-}
-
-.transaction-link-btn:hover {
-  background: #2563eb;
-}
-
-.card-switch-btn:disabled,
-.transaction-link-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.notification {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 1rem;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  z-index: 1100;
-  animation: slideIn 0.3s ease;
-}
-
-.notification.success {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.notification.error {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
-
-.notification button {
-  background: none;
-  border: none;
-  color: inherit;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0;
-  opacity: 0.7;
-}
-
-.notification button:hover {
-  opacity: 1;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
+/* Responsive Design */
 @media (max-width: 768px) {
-  .transactions-container {
-    padding: 1rem;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .transaction-header {
+  .transaction-card {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+    gap: 15px;
+    text-align: center;
   }
 
-  .cards-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-content {
-    padding: 1.5rem;
-    width: 95%;
-  }
-
-  .plan-details {
-    grid-template-columns: 1fr;
-  }
-
-  .card-selection-modal {
-    width: 95%;
-    padding: 1rem;
-  }
-
-  .modal-actions {
+  .transaction-actions {
     flex-direction: column;
-  }
-
-  .modal-actions button {
     width: 100%;
   }
-}
 
-.transaction-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
+  .card-switch-btn,
+  .pay-btn {
+    width: 100%;
+  }
 
-.transaction-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.transaction-card.selected {
-  border: 2px solid #007bff;
-  background-color: #f8f9fa;
-}
-
-.transaction-info {
-  margin-bottom: 15px;
-}
-
-.transaction-info h3 {
-  margin: 0 0 10px 0;
-  color: #333;
-}
-
-.transaction-info p {
-  margin: 5px 0;
-  color: #666;
-}
-
-.payment-methods {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.payment-method {
-  background: #f8f9fa;
-  padding: 8px 12px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.card-brand {
-  font-weight: 500;
-  color: #333;
-}
-
-.card-last4 {
-  color: #fff;
-  background: #333;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 0.9em;
-}
-
-.connect-bank-btn {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.connect-bank-btn:hover {
-  background: #218838;
-}
-
-.connect-bank-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.payment-plan-section {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.payment-plan-section h3 {
-  margin-bottom: 1.5rem;
-  color: #1f2937;
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.payment-plan-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.payment-plan-option {
-  background: #ffffff;
-  padding: 1.25rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.payment-plan-option:hover {
-  background: #f9fafb;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.payment-plan-option.selected {
-  background: #eff6ff;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.plan-name {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 1.1rem;
-}
-
-.plan-payments {
-  color: #4b5563;
-  font-size: 0.95rem;
-}
-
-.plan-apr {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: #f3f4f6;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.apr-label {
-  color: #6b7280;
-}
-
-.apr-value {
-  color: #1f2937;
-  font-weight: 600;
-}
-
-.plan-description {
-  color: #6b7280;
-  font-size: 0.875rem;
-  line-height: 1.4;
-}
-
-.modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.modal-content h2 {
-  margin-bottom: 1.5rem;
-  color: #1f2937;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.card-option {
-  background: #ffffff;
-  padding: 1.25rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.card-option:hover {
-  background: #f9fafb;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.card-option.selected {
-  background: #eff6ff;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.card-brand {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 1.1rem;
-}
-
-.card-number {
-  color: #1f2937;
-  font-size: 1.1rem;
-  font-weight: 500;
-  background: #f3f4f6;
-  padding: 0.5rem;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.card-expiry {
-  color: #6b7280;
-  font-size: 0.9rem;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
-  position: sticky;
-  bottom: 0;
-  background: white;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.switch-card-btn,
-.cancel-btn {
-  flex: 1;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.switch-card-btn {
-  background: #3b82f6;
-  color: white;
-  border: none;
-}
-
-.switch-card-btn:hover:not(:disabled) {
-  background: #2563eb;
-}
-
-.switch-card-btn:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
-
-.cancel-btn {
-  background: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
-}
-
-.cancel-btn:hover {
-  background: #e5e7eb;
-}
-
-.transaction-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.card-switch-btn,
-.transaction-link-btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-}
-
-.card-switch-btn {
-  background: #10b981;
-  color: white;
-}
-
-.card-switch-btn:hover {
-  background: #059669;
-}
-
-.transaction-link-btn {
-  background: #3b82f6;
-  color: white;
-}
-
-.transaction-link-btn:hover {
-  background: #2563eb;
-}
-
-.card-switch-btn:disabled,
-.transaction-link-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  .payment-plans-grid {
+    grid-template-columns: 1fr;
+  }
 } 

@@ -150,7 +150,7 @@ class KnotSDK {
 
     // Invoke the open method with parameters
     knotapi.open({
-      sessionId: "023bcf63-24e7-42ca-a0be-5814cd52abb8",
+      sessionId: "d0817c84-f148-49cd-b5b4-d836ea716c8e",
       clientId: "23c681b3-86c2-4afc-a893-93b851681283",
       environment: "development",  // or "production"
       product: "card_switcher",  // or "transaction_link"
