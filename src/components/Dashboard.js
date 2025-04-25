@@ -114,6 +114,116 @@ const Dashboard = () => {
     return Math.round(baseLimit);
   };
 
+  const calculateSpendingLimitAdjustment = (userData, missedPayment = false) => {
+    // Base factors for the ML model
+    const factors = {
+      paymentHistory: calculatePaymentHistoryScore(userData.paymentHistory),
+      creditScore: calculateCreditScore(userData),
+      riskScore: userData.riskHistory[userData.riskHistory.length - 1].score,
+      missedPaymentsCount: userData.paymentHistory.filter(p => p.status === 'missed').length,
+      totalPayments: userData.paymentHistory.length,
+      consecutiveMissedPayments: calculateConsecutiveMissedPayments(userData.paymentHistory),
+      averagePaymentAmount: calculateAveragePaymentAmount(userData.paymentHistory),
+      timeBetweenPayments: calculateTimeBetweenPayments(userData.paymentHistory)
+    };
+
+    // Calculate base adjustment percentage using a weighted approach
+    let adjustmentPercentage = 0;
+
+    // Payment history impact (30% weight)
+    const paymentHistoryImpact = (1 - factors.paymentHistory) * 0.3;
+    
+    // Risk score impact (25% weight)
+    const riskScoreImpact = factors.riskScore * 0.25;
+    
+    // Missed payments ratio impact (20% weight)
+    const missedPaymentsRatio = factors.missedPaymentsCount / Math.max(factors.totalPayments, 1);
+    const missedPaymentsImpact = missedPaymentsRatio * 0.2;
+    
+    // Consecutive missed payments impact (15% weight)
+    const consecutiveMissedImpact = Math.min(factors.consecutiveMissedPayments * 0.05, 0.15);
+    
+    // Time between payments impact (10% weight)
+    const timeBetweenPaymentsImpact = (1 - factors.timeBetweenPayments) * 0.1;
+
+    // Combine all impacts
+    adjustmentPercentage = (
+      paymentHistoryImpact +
+      riskScoreImpact +
+      missedPaymentsImpact +
+      consecutiveMissedImpact +
+      timeBetweenPaymentsImpact
+    ) * 100;
+
+    // Apply non-linear scaling based on risk level
+    if (factors.riskScore > 0.7) {
+      adjustmentPercentage *= 1.5; // Increase penalty for high-risk users
+    } else if (factors.riskScore < 0.3) {
+      adjustmentPercentage *= 0.7; // Reduce penalty for low-risk users
+    }
+
+    // Cap the maximum decrease at 30%
+    return Math.min(Math.max(adjustmentPercentage, 5), 30);
+  };
+
+  const calculatePaymentHistoryScore = (paymentHistory) => {
+    if (!paymentHistory || paymentHistory.length === 0) return 1;
+    
+    const recentPayments = paymentHistory.slice(-6); // Consider last 6 payments
+    const weightedScore = recentPayments.reduce((score, payment, index) => {
+      const weight = (index + 1) / recentPayments.length; // More recent payments have higher weight
+      return score + (payment.status === 'paid' ? weight : 0);
+    }, 0);
+    
+    return weightedScore / recentPayments.length;
+  };
+
+  const calculateCreditScore = (userData) => {
+    const baseScore = userData.creditScore || 650;
+    return (baseScore - 300) / 550; // Normalize to 0-1 range
+  };
+
+  const calculateConsecutiveMissedPayments = (paymentHistory) => {
+    if (!paymentHistory || paymentHistory.length === 0) return 0;
+    
+    let consecutive = 0;
+    let maxConsecutive = 0;
+    
+    paymentHistory.forEach(payment => {
+      if (payment.status === 'missed') {
+        consecutive++;
+        maxConsecutive = Math.max(maxConsecutive, consecutive);
+      } else {
+        consecutive = 0;
+      }
+    });
+    
+    return maxConsecutive;
+  };
+
+  const calculateAveragePaymentAmount = (paymentHistory) => {
+    if (!paymentHistory || paymentHistory.length === 0) return 0;
+    
+    const amounts = paymentHistory.map(p => p.amount);
+    return amounts.reduce((a, b) => a + b, 0) / amounts.length;
+  };
+
+  const calculateTimeBetweenPayments = (paymentHistory) => {
+    if (!paymentHistory || paymentHistory.length < 2) return 1;
+    
+    const dates = paymentHistory.map(p => new Date(p.date));
+    const intervals = [];
+    
+    for (let i = 1; i < dates.length; i++) {
+      const days = (dates[i] - dates[i-1]) / (1000 * 60 * 60 * 24);
+      intervals.push(days);
+    }
+    
+    const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const normalizedInterval = Math.min(Math.max(avgInterval / 30, 0), 1); // Normalize to 0-1 range
+    return normalizedInterval;
+  };
+
   const updateSpendingLimit = (newRiskScore) => {
     const oldLimit = userData.spendingLimit;
     let newLimit = oldLimit;
@@ -429,38 +539,33 @@ const Dashboard = () => {
       score: newRiskScore
     });
 
-    // Update spending limit based on new risk score
+    // Update spending limit based on ML model
     const oldLimit = updatedUserData.spendingLimit;
-    let newLimit = oldLimit;
-    let reason = '';
+    const decreasePercentage = calculateSpendingLimitAdjustment(updatedUserData, true);
+    const decrease = Math.floor(oldLimit * (decreasePercentage / 100));
+    const newLimit = oldLimit - decrease;
+    const reason = `Missed payment detected - Risk-based adjustment of ${decreasePercentage.toFixed(1)}%`;
 
-    // Always decrease limit for missed payment
-    const decrease = Math.floor(oldLimit * 0.15); // 15% decrease
-    newLimit = oldLimit - decrease;
-    reason = "Missed payment detected";
-
-    if (newLimit !== oldLimit) {
-      updatedUserData.spendingLimit = newLimit;
-      if (!updatedUserData.limitHistory) {
-        updatedUserData.limitHistory = [];
-      }
-      updatedUserData.limitHistory.push({
-        date: new Date().toISOString(),
-        limit: newLimit,
-        change: {
-          amount: newLimit - oldLimit,
-          percentage: ((newLimit - oldLimit) / oldLimit) * 100,
-          reason
-        }
-      });
-
-      // Set limit change notification
-      setLimitChange({
+    updatedUserData.spendingLimit = newLimit;
+    if (!updatedUserData.limitHistory) {
+      updatedUserData.limitHistory = [];
+    }
+    updatedUserData.limitHistory.push({
+      date: new Date().toISOString(),
+      limit: newLimit,
+      change: {
         amount: newLimit - oldLimit,
         percentage: ((newLimit - oldLimit) / oldLimit) * 100,
         reason
-      });
-    }
+      }
+    });
+
+    // Set limit change notification
+    setLimitChange({
+      amount: newLimit - oldLimit,
+      percentage: ((newLimit - oldLimit) / oldLimit) * 100,
+      reason
+    });
 
     // Update state and localStorage atomically
     setUserData(updatedUserData);
@@ -470,7 +575,7 @@ const Dashboard = () => {
     const paymentProgress = `${plan.payments}/${plan.totalPayments} months paid`;
     setNotification({
       type: 'error',
-      message: `Payment missed: ${paymentProgress}. Your spending limit has been decreased by ${Math.abs(((newLimit - oldLimit) / oldLimit) * 100).toFixed(1)}%`
+      message: `Payment missed: ${paymentProgress}. Your spending limit has been decreased by ${decreasePercentage.toFixed(1)}%`
     });
 
     // Update active plans and payment history states

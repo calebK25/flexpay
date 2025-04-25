@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PaymentPlans from './PaymentPlans';
 import './Shop.css';
 
 const MOCK_PRODUCTS = [
@@ -39,6 +40,7 @@ const Shop = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPaymentPlans, setShowPaymentPlans] = useState(false);
 
   useEffect(() => {
     // Get user data from localStorage
@@ -62,10 +64,18 @@ const Shop = () => {
   const handleProductSelect = (product) => {
     setSelectedProduct(product);
     setSelectedPlan(null);
+    setShowPaymentPlans(true);
   };
 
   const handlePlanSelect = (plan) => {
     setSelectedPlan(plan);
+  };
+
+  const handlePaymentPlanConfirm = (plan) => {
+    // Handle the payment plan confirmation
+    console.log('Selected product:', selectedProduct);
+    console.log('Selected payment plan:', plan);
+    // Add your payment processing logic here
   };
 
   const handlePurchase = async () => {
@@ -136,48 +146,13 @@ const Shop = () => {
       </div>
 
       {selectedProduct && (
-        <div className="checkout-section">
-          <h2>Choose your payment plan</h2>
-          <div className="payment-plans">
-            {INSTALLMENT_PLANS.map(plan => (
-              <div
-                key={plan.months}
-                className={`payment-plan ${selectedPlan?.months === plan.months ? 'selected' : ''}`}
-                onClick={() => handlePlanSelect(plan)}
-              >
-                <h3>{plan.months} Months</h3>
-                <p className="monthly-payment">
-                  ${calculateMonthlyPayment(selectedProduct.price, plan).toFixed(2)}/month
-                </p>
-                {plan.interestRate > 0 && (
-                  <p className="interest-rate">{plan.interestRate * 100}% APR</p>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {selectedPlan && (
-            <div className="purchase-summary">
-              <h3>Purchase Summary</h3>
-              <div className="summary-details">
-                <p>Product: {selectedProduct.name}</p>
-                <p>Price: ${selectedProduct.price.toLocaleString()}</p>
-                <p>Plan: {selectedPlan.months} months</p>
-                <p>Monthly Payment: ${calculateMonthlyPayment(selectedProduct.price, selectedPlan).toFixed(2)}</p>
-                {selectedPlan.interestRate > 0 && (
-                  <p>Total Interest: ${(calculateMonthlyPayment(selectedProduct.price, selectedPlan) * selectedPlan.months - selectedProduct.price).toFixed(2)}</p>
-                )}
-              </div>
-              <button
-                className={`purchase-button ${loading ? 'loading' : ''}`}
-                onClick={handlePurchase}
-                disabled={loading}
-              >
-                {loading ? 'Processing...' : 'Complete Purchase'}
-              </button>
-            </div>
-          )}
-        </div>
+        <PaymentPlans
+          isOpen={showPaymentPlans}
+          onClose={() => setShowPaymentPlans(false)}
+          onConfirm={handlePaymentPlanConfirm}
+          productPrice={selectedProduct.price}
+          userData={userData}
+        />
       )}
     </div>
   );

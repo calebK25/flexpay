@@ -1,7 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-const { getKnotClient } = require('./knotUtils');
 const axios = require('axios');
 require('dotenv').config();
 
@@ -16,14 +14,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use(bodyParser.json());
-
-// Initialize Knot client
-const knotClient = getKnotClient();
-
-app.get('/test', (req, res) => {
-  res.send('Server is running');
-});
+// express.json() already handles JSON parsing
 
 // Webhook endpoint for Knot API events
 app.post('/webhook/knot', async (req, res) => {

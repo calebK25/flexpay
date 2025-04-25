@@ -1,71 +1,62 @@
-# Getting Started with Create React App
+# flexpay-demo
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A demo full-stack application combining a React front-end with an Express.js back-end.
+Integrates Knot API for payment and card management, and uses mock Plaid transactions for demonstration.
+
+## Features
+- Create and manage Knot sessions (card switcher, transaction link)
+- Webhook processing for card and payment events
+- Credit limit adjustment based on risk score
+- Mock Plaid integration for transaction data
+- Responsive React UI with React Router and Chart.js
+
+## Prerequisites
+- Node.js (>=14) and npm
+- Knot API account and credentials
+
+## Setup
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/your-org/flexpay-demo.git
+   cd flexpay-demo
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file in the root:
+   ```
+   REACT_APP_KNOT_API_KEY=your_knot_api_key
+   REACT_APP_KNOT_CLIENT_ID=your_knot_client_id
+   REACT_APP_KNOT_SECRET=your_knot_secret
+   ```
+4. Run in development mode (client on 3000, server on 3001):
+   ```bash
+   npm run dev
+   ```
 
 ## Available Scripts
+- `npm start` – start the React front-end (port 3000)
+- `npm run server` – start the Express back-end (port 3001)
+- `npm run dev`    – start both front-end and back-end concurrently
 
-In the project directory, you can run:
+## API Endpoints
+Back-end (port 3001):
+- `GET /test`  
+- `POST /webhook/knot`  
+- `POST /api/create-knot-session`  
+- `POST /api/adjust-credit-limit`
 
-### `npm start`
+## Project Structure
+```plaintext
+/flexpay-demo
+├ server.js
+├ package.json
+├ .env
+└ src/           # React front-end
+   ├ index.js
+   ├ App.js
+   └ ...
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# flexpay
+## License
+MIT

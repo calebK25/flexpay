@@ -19,27 +19,27 @@ class KnotSDK {
       // List of supported merchants for testing
       this.supportedMerchants = [
         {
-          id: 'merchant_123',
+          id: 17,
           name: 'Amazon',
           description: 'Amazon.com'
         },
         {
-          id: 'merchant_456',
+          id: 18,
           name: 'Walmart',
           description: 'Walmart.com'
         },
         {
-          id: 'merchant_789',
+          id: 19,
           name: 'Target',
           description: 'Target.com'
         },
         {
-          id: 'merchant_101',
+          id: 20,
           name: 'Best Buy',
           description: 'BestBuy.com'
         },
         {
-          id: 'merchant_102',
+          id: 21,
           name: 'Costco',
           description: 'Costco.com'
         }
@@ -74,110 +74,112 @@ class KnotSDK {
     }
   }
 
-  async createSession() {
+  async createSession(product = 'card_switcher') {
     try {
-      console.log('Creating Knot session with clientId:', process.env.REACT_APP_KNOT_CLIENT_ID);
-      const clientId = process.env.REACT_APP_KNOT_CLIENT_ID;
-      if (!process.env.REACT_APP_KNOT_CLIENT_ID) {
-        throw new Error('Knot Client ID is not configured');
+      if (!KNOT_ID || !KNOT_SECRET) {
+        throw new Error('Knot credentials are not configured');
       }
 
-      const product = 'transaction_link';
+      const requestBody = {
+        external_user_id: "user_" + Date.now(),
+        type: product,
+        ...(product === "card_switcher" && { card_id: "test" })
+      };
 
-      try {
-        const requestBody = {
-          external_user_id: "test",
-          type: product || 'transaction_link',
-          ...(product === "card_switcher" && { card_id: "test" })
-        };
-        console.log('Creating Knot session with:', { clientId, product });
-    
-        if (!clientId) {
-          throw new Error('Client ID is required');
-        }
-        
-        console.log('Sending request to Knot API:', requestBody);
-        const basicAuthHeader = 'Basic ' + btoa(`${process.env.REACT_APP_KNOT_CLIENT_ID}:${process.env.REACT_APP_KNOT_API_KEY}`);
-        console.log('Basic auth header:', basicAuthHeader);
-        const res = await axios.post('https://development.knotapi.com/session/create', requestBody, {
-          headers: {
-            'Authorization': basicAuthHeader,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-    
-        console.log('Knot API response:', res.data);
-    
-        if (!res.data || !res.data.session) {
-          throw new Error('Invalid response from Knot API');
-        }
-    
-        res.json({
-          session_id: res.data.session
-        });
-      } catch (error) {
-        console.error('Error creating Knot session:', error.res?.data || error.message);
-        res.status(500).json({
-          error: error.response?.data?.message || error.message || 'Failed to create Knot session'
-        });
-      }
-
-      console.log('Response status:', response.status);
+      console.log('Creating Knot session with:', { clientId: KNOT_ID, product });
       
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error('Server error response:', errorData);
-        throw new Error(errorData.error || 'Failed to create session');
+      const basicAuthHeader = 'Basic ' + btoa(`${KNOT_ID}:${KNOT_SECRET}`);
+      const response = await axios.post('https://development.knotapi.com/session/create', requestBody, {
+        headers: {
+          'Authorization': basicAuthHeader,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      console.log('Knot API session response:', response.data);
+
+      if (!response.data || !response.data.session) {
+        throw new Error('Invalid response from Knot API');
       }
 
-      const data = await response.json();
-      console.log('Session created successfully:', data);
-
-      if (!data.session_id) {
-        throw new Error('No session ID received from server');
-      }
-
-      return data.session_id;
+      return response.data.session;
     } catch (error) {
-      console.error('Error creating session:', error);
-      throw error;
+      console.error('Error creating Knot session:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to create Knot session');
     }
   }
 
   async openCardSwitcher(merchantId) {
-    const knotapi = new KnotapiJS();
+    try {
+      // Create a new session for the card switcher
+      const sessionId = await this.createSession('card_switcher');
+      console.log('Created session for card switcher:', sessionId);
 
-    // Invoke the open method with parameters
-    knotapi.open({
-      sessionId: "d0817c84-f148-49cd-b5b4-d836ea716c8e",
-      clientId: "23c681b3-86c2-4afc-a893-93b851681283",
-      environment: "development",  // or "production"
-      product: "card_switcher",  // or "transaction_link"
-      merchantIds: [17],
-      entryPoint: "onboarding"
-    });
-    // try {
-    //   const response = await axios.post('https://development.knotapi.com/card', {
-    //     merchant_id: merchantId,
-    //     client_id: KNOT_ID,
-    //     client_secret: KNOT_SECRET
-    //   });
-    //   return response.data;
-    // } catch (error) {
-    //   console.error('Error opening card switcher:', error);
-    //   throw error;
-    // }
+      // Initialize KnotAPI if not already done
+      const knotapi = this.knotapi || new KnotapiJS();
+
+      // Find the merchant in our supported list
+      const merchant = this.supportedMerchants.find(m => m.id === merchantId) || this.supportedMerchants[0];
+
+      // Invoke the open method with parameters
+      await knotapi.open({
+        sessionId: sessionId,
+        clientId: KNOT_ID,
+        environment: "development",
+        product: "card_switcher",
+        merchantIds: [merchant.id],
+        entryPoint: "onboarding",
+        onSuccess: (result) => {
+          console.log('Card switch successful:', result);
+          return result;
+        },
+        onExit: () => {
+          console.log('Card switcher closed');
+        },
+        onError: (error) => {
+          console.error('Card switch error:', error);
+          throw error;
+        }
+      });
+    } catch (error) {
+      console.error('Error opening card switcher:', error);
+      throw error;
+    }
   }
 
   async openTransactionLink(merchantId) {
     try {
-      const response = await axios.post('https://development.knotapi.com/transaction-link', {
-        merchant_id: merchantId,
-        client_id: KNOT_ID,
-        client_secret: KNOT_SECRET
+      // Create a new session for the transaction link
+      const sessionId = await this.createSession('transaction_link');
+      console.log('Created session for transaction link:', sessionId);
+
+      // Initialize KnotAPI if not already done
+      const knotapi = this.knotapi || new KnotapiJS();
+
+      // Find the merchant in our supported list
+      const merchant = this.supportedMerchants.find(m => m.id === merchantId) || this.supportedMerchants[0];
+
+      // Invoke the open method with parameters
+      await knotapi.open({
+        sessionId: sessionId,
+        clientId: KNOT_ID,
+        environment: "development",
+        product: "transaction_link",
+        merchantIds: [merchant.id],
+        entryPoint: "onboarding",
+        onSuccess: (result) => {
+          console.log('Transaction link successful:', result);
+          return result;
+        },
+        onExit: () => {
+          console.log('Transaction link closed');
+        },
+        onError: (error) => {
+          console.error('Transaction link error:', error);
+          throw error;
+        }
       });
-      return response.data;
     } catch (error) {
       console.error('Error opening transaction link:', error);
       throw error;
